@@ -6,19 +6,15 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SaleDto {
-    private Long saleId;
+    private String saleId;
+    private String customerId;
+    private String userId;
     private LocalDateTime saleDate;
     private BigDecimal totalAmount;
     private String orderStatus;
-    private Long customerId;
-    private String customerName;
-    private Long userId;
-    private List<SaleItemDto> saleItems;
-    private List<PaymentDto> payments;
 }
