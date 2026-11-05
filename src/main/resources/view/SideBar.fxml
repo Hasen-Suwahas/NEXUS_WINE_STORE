@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxWidth="215" minWidth="215" prefWidth="215" spacing="4" styleClass="sidebar" stylesheets="@../style/pages.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.SidebarController">
+    <padding><Insets bottom="16" left="12" right="12" top="22" /></padding>
+
+    <fx:define><ToggleGroup fx:id="navGroup" /></fx:define>
+
+    <!-- logo -->
+    <VBox alignment="CENTER" spacing="6">
+        <StackPane styleClass="logo-ring"><Label styleClass="logo-mono" text="NV" /></StackPane>
+        <Label styleClass="logo-text" text="NEXUS WINE STORE" />
+    </VBox>
+    <Region prefHeight="14" />
+
+    <ToggleButton fx:id="navDashboard" maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="⌂   Dashboard" toggleGroup="$navGroup" userData="DashBoard" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="🍷   Products" toggleGroup="$navGroup" userData="Product" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="🗂   Categories" toggleGroup="$navGroup" userData="Category" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="📦   Stock" toggleGroup="$navGroup" userData="Stock" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="🧾   Purchases" toggleGroup="$navGroup" userData="Purchase" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="🛒   Sales / POS" toggleGroup="$navGroup" userData="Sale" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="👥   Customers" toggleGroup="$navGroup" userData="Customer" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="🚚   Suppliers" toggleGroup="$navGroup" userData="Supplier" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="💳   Payments &amp; Billing" toggleGroup="$navGroup" userData="Payment" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="👤   Staff &amp; Users" toggleGroup="$navGroup" userData="User" />
+    <ToggleButton maxWidth="Infinity" onAction="#navigate" styleClass="nav-btn" text="⚙   Settings" toggleGroup="$navGroup" userData="Setting" />
+
+    <Region VBox.vgrow="ALWAYS" />
+
+    <!-- logged-in user -->
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="user-box">
+        <StackPane styleClass="avatar"><Label fx:id="lblAvatar" styleClass="avatar-text" text="A" /></StackPane>
+        <VBox spacing="1">
+            <Label fx:id="lblUserName" styleClass="user-name" text="Admin" />
+            <Label fx:id="lblUserRole" styleClass="user-role" text="Online" />
+        </VBox>
+    </HBox>
+</VBox>
