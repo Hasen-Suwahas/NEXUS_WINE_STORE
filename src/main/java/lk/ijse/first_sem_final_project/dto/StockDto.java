@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class StockDto {
     private Long stockId;
+    private Long productId;
     private Integer quantity;
     private LocalDateTime lastUpdated;
-    private Long productId;
-    private String productName;
+
 }

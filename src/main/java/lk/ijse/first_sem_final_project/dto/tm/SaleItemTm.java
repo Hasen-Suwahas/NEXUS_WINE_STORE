@@ -10,12 +10,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SaleItemTm {
-    private Long saleItemId;
-    private Long saleId;
-    private Long productId;
-    private String productName;
-    private Integer quantity;
+    private int saleItemId;
+    private int saleId;
+    private int productId;
+    private int quantity;
     private BigDecimal unitPrice;
     private BigDecimal subtotal;
 }
-

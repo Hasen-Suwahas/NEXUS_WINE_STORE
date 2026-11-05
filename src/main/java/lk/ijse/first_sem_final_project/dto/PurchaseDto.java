@@ -6,17 +6,14 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchaseDto {
-    private Long purchaseId;
+    private String purchaseId;
+    private String supplierId;
+    private String userId;
     private LocalDate purchaseDate;
     private BigDecimal totalAmount;
-    private Long supplierId;
-    private String supplierName;
-    private Long userId;
-    private List<PurchaseItemDto> purchaseItems;
 }
