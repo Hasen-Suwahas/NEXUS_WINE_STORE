@@ -13,8 +13,8 @@ public class UserModel {
         return CrudUtil.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)",
                 dto.getUserId(),
                 dto.getUsername(),
-                dto.getPasswordHash(),
-                dto.getFullName(),
+                dto.getPassword_hash(),
+                dto.getFull_Name(),
                 dto.getPhone(),
                 dto.getRole(),
                 dto.getStatus());
@@ -23,8 +23,8 @@ public class UserModel {
     public boolean updateUser(UserDto dto) throws SQLException, ClassNotFoundException {
         return CrudUtil.execute("UPDATE users SET username = ?, password_hash = ?, full_name = ?, phone = ?, role = ?, status = ? WHERE user_id = ?",
                 dto.getUsername(),
-                dto.getPasswordHash(),
-                dto.getFullName(),
+                dto.getPassword_hash(),
+                dto.getFull_Name(),
                 dto.getPhone(),
                 dto.getRole(),
                 dto.getStatus(),
@@ -39,7 +39,7 @@ public class UserModel {
         ResultSet rs = CrudUtil.execute("SELECT * FROM users WHERE user_id = ?", userId);
         if (rs.next()) {
             return new UserDto(
-                    rs.getString("user_id"),
+                    rs.getLong("user_id"),
                     rs.getString("username"),
                     rs.getString("password_hash"),
                     rs.getString("full_name"),
@@ -56,7 +56,7 @@ public class UserModel {
         ArrayList<UserDto> list = new ArrayList<>();
         while (rs.next()) {
             list.add(new UserDto(
-                    rs.getString("user_id"),
+                    rs.getLong("user_id"),
                     rs.getString("username"),
                     rs.getString("password_hash"),
                     rs.getString("full_name"),

@@ -35,8 +35,8 @@ public class StockModel {
         ResultSet rs = CrudUtil.execute("SELECT * FROM stock WHERE stock_id = ?", stockId);
         if (rs.next()) {
             return new StockDto(
-                    rs.getString("stock_id"),
-                    rs.getString("product_id"),
+                    rs.getLong("stock_id"),
+                    rs.getLong("product_id"),
                     rs.getInt("quantity"),
                     rs.getTimestamp("last_updated").toLocalDateTime()
             );
@@ -49,8 +49,8 @@ public class StockModel {
         ArrayList<StockDto> list = new ArrayList<>();
         while (rs.next()) {
             list.add(new StockDto(
-                    rs.getString("stock_id"),
-                    rs.getString("product_id"),
+                    rs.getLong("stock_id"),
+                    rs.getLong("product_id"),
                     rs.getInt("quantity"),
                     rs.getTimestamp("last_updated").toLocalDateTime()
             ));
