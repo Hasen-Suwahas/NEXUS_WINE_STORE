@@ -44,7 +44,6 @@
             <ToggleButton toggleGroup="$navGroup" text="🚚   Suppliers" userData="Supplier" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="💳   Payments" userData="Payment" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="👤   Users" userData="User" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="⚙   Settings" userData="Setting" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 

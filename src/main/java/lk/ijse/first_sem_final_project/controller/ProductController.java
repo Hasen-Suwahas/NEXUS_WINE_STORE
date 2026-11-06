@@ -12,11 +12,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/// Products page.  tables: products, categories, stock
-public abstract class ProductController extends BasePageController<ProductController.ProductRow> {
+/** Products page.  tables: products, categories, stock */
+public class ProductController extends BasePageController<ProductController.ProductRow> {
 
     public record ProductRow(int id, String name, int categoryId, String category, String description,
                              double cost, double price, int stock, int reorder) {}
+
+    @Override protected String pageKey() { return "Product"; }
 
     @Override
     protected void setupColumns() {
