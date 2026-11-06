@@ -21,14 +21,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /*
- *   users(user_id, full_name, username, password_hash, role, phone, status)
- * All JDBC code is inside this class
+-   users(user_id, full_name, username, password_hash, role, phone, status)
+- All JDBC code is inside this class
  */
 public class LoginController {
 
@@ -36,6 +35,7 @@ public class LoginController {
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
     private static final String DASHBOARD_FXML = "/view/DashBoardPage.fxml";
+    private static final String SIGNUP_FXML    = "/view/SignUpPage.fxml"; // <- Sign Up FXML path එක (අවශ්‍ය නම් වෙනස් කරගන්න)
     private static final String SIDE_IMAGE = "/image/login_side.jpg";   // optional bottle/wine photo
 
     @FXML private StackPane root;
@@ -43,7 +43,7 @@ public class LoginController {
     @FXML private HBox userBox, passBox;
     @FXML private TextField txtUsername, txtPasswordVisible;
     @FXML private PasswordField txtPassword;
-    @FXML private Button btnLogin, btnEye;
+    @FXML private Button btnLogin, btnSignUp, btnEye;
     @FXML private Label lblError;
 
     private double dragX, dragY;
@@ -162,7 +162,7 @@ public class LoginController {
             stage.setMinHeight(760);
 
             Object c = loader.getController();
-            if (c instanceof DashBoardPageController dc) {          // your dashboard controller class name
+            if (c instanceof DashBoardPageController dc) {
                 dc.setCurrentUser(user.fullName(), user.role());
                 stage.setOnCloseRequest(e -> dc.shutdown());
             }
@@ -173,6 +173,26 @@ public class LoginController {
         } catch (Exception ex) {
             ex.printStackTrace();
             showError("Could not open the dashboard: " + ex.getMessage());
+        }
+    }
+
+    // ===================== SIGN UP ACTION =====================
+    @FXML
+    private void onSignUp() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(SIGNUP_FXML));
+            Parent signup = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Nexus Wine Store - Sign Up");
+            stage.setScene(new Scene(signup, 1000, 640));
+            stage.show();
+            stage.centerOnScreen();
+
+            ((Stage) root.getScene().getWindow()).close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Could not open the Sign Up window: " + ex.getMessage());
         }
     }
 

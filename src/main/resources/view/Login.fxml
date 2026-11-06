@@ -105,8 +105,14 @@
             <VBox.margin><Insets top="10" /></VBox.margin>
          </Label>
 
+         <!-- Login Button -->
          <Button fx:id="btnLogin" defaultButton="true" maxWidth="430" onAction="#onLogin" styleClass="login-btn" text="LOGIN">
             <VBox.margin><Insets top="22" /></VBox.margin>
+         </Button>
+
+         <!-- Sign Up Button -->
+         <Button fx:id="btnSignUp" maxWidth="430" onAction="#onSignUp" styleClass="login-btn" text="SIGN UP">
+            <VBox.margin><Insets top="12" /></VBox.margin>
          </Button>
 
          <HBox alignment="CENTER" spacing="8">
