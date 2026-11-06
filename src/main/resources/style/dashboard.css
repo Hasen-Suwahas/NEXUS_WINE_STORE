@@ -1,0 +1,121 @@
+/* ============ Nexus black & gold theme ============ */
+.root {
+    -fx-font-family: "Segoe UI", "Inter", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -gold: #d9ac4c;
+    -gold-light: #f0d27a;
+    -gold-dim: #8f7330;
+    -ink: #050505;
+    -panel: #0a0a0a;
+    -text: #f4ead0;
+    -muted: #b9ad8c;
+}
+
+.app-bg { -fx-background-color: linear-gradient(to right, #8f6b1d, #f3d77e 50%, #a67c27); }
+
+/* name badge */
+.store-badge {
+    -fx-background-color: #0b0b0b; -fx-background-radius: 14;
+    -fx-border-color: -gold; -fx-border-width: 2; -fx-border-radius: 14;
+    -fx-padding: 8 24 8 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 12, 0.2, 0, 4);
+}
+.badge-crown { -fx-text-fill: -gold-light; -fx-font-size: 22px; }
+.badge-text  { -fx-text-fill: -gold-light; -fx-font-family: "Georgia", serif; -fx-font-size: 24px; -fx-font-weight: bold; }
+
+/* main frame */
+.shell {
+    -fx-background-color: #000;
+    -fx-background-radius: 18;
+    -fx-border-color: -gold; -fx-border-width: 2; -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 24, 0.1, 0, 8);
+}
+
+/* ============ Sidebar ============ */
+.sidebar { -fx-background-color: #040404; -fx-background-radius: 18 0 0 18; -fx-border-color: transparent #2d2410 transparent transparent; -fx-border-width: 0 1 0 0; }
+.logo-ring { -fx-background-color: transparent; -fx-border-color: -gold; -fx-border-width: 2; -fx-border-radius: 50; -fx-background-radius: 50;
+    -fx-min-width: 54; -fx-min-height: 54; -fx-max-width: 54; -fx-max-height: 54; }
+.logo-crown { -fx-text-fill: -gold; -fx-font-size: 24px; }
+.logo-text  { -fx-text-fill: -gold; -fx-font-family: "Georgia", serif; -fx-font-size: 16px; -fx-font-weight: bold; }
+
+.nav-btn {
+    -fx-background-color: transparent; -fx-text-fill: #e9dfc2;
+    -fx-alignment: CENTER_LEFT; -fx-padding: 9 12 9 14;
+    -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 13px;
+}
+.nav-btn:hover { -fx-background-color: #17130a; }
+.nav-btn:selected {
+    -fx-background-color: linear-gradient(to right, #d9ac4c, #b8862f);
+    -fx-text-fill: #0b0b0b; -fx-font-weight: bold;
+}
+
+.user-box { -fx-padding: 8 4 0 4; -fx-border-color: #2d2410 transparent transparent transparent; -fx-border-width: 1 0 0 0; }
+.avatar { -fx-background-color: -gold; -fx-background-radius: 50; -fx-min-width: 38; -fx-min-height: 38; -fx-max-width: 38; -fx-max-height: 38; }
+.avatar-text { -fx-text-fill: #0b0b0b; -fx-font-weight: bold; -fx-font-size: 16px; }
+.user-name { -fx-text-fill: -text; -fx-font-weight: bold; }
+.user-role { -fx-text-fill: -muted; -fx-font-size: 11px; }
+
+/* ============ Content ============ */
+.content { -fx-background-color: #000; -fx-background-radius: 0 18 18 0; }
+.h1 { -fx-text-fill: -gold; -fx-font-family: "Georgia", serif; -fx-font-size: 26px; -fx-font-weight: bold; }
+.greeting { -fx-text-fill: white; -fx-font-size: 20px; }
+.muted { -fx-text-fill: -muted; }
+.clock { -fx-text-fill: -text; -fx-font-size: 14px; }
+.live-label { -fx-text-fill: -gold-dim; -fx-font-size: 10.5px; }
+
+/* stat cards */
+.stat-card { -fx-background-color: -panel; -fx-background-radius: 14; -fx-border-color: -gold; -fx-border-width: 1.2; -fx-border-radius: 14; -fx-padding: 16 18 16 18; }
+.stat-icon { -fx-background-color: transparent; -fx-border-color: -gold; -fx-border-width: 1.5; -fx-border-radius: 50; -fx-background-radius: 50;
+    -fx-min-width: 50; -fx-min-height: 50; -fx-max-width: 50; -fx-max-height: 50; }
+.stat-icon-text { -fx-text-fill: -gold; -fx-font-size: 20px; }
+.stat-caption { -fx-text-fill: -text; -fx-font-size: 13px; }
+.stat-value { -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold; }
+.stat-sub { -fx-text-fill: -gold-dim; -fx-font-size: 10.5px; }
+
+/* panels */
+.panel { -fx-background-color: -panel; -fx-background-radius: 14; -fx-border-color: -gold; -fx-border-width: 1.2; -fx-border-radius: 14; -fx-padding: 14 16 12 16; }
+.panel-title { -fx-text-fill: -text; -fx-font-size: 15px; }
+.section-title { -fx-text-fill: -gold; -fx-font-size: 15px; }
+
+/* combo */
+.gold-combo { -fx-background-color: #0b0b0b; -fx-border-color: #6d5724; -fx-border-radius: 8; -fx-background-radius: 8; }
+.gold-combo .list-cell { -fx-text-fill: -text; -fx-background-color: transparent; }
+.gold-combo .arrow { -fx-background-color: -gold; }
+.combo-box-popup .list-view { -fx-background-color: #0b0b0b; -fx-border-color: -gold-dim; }
+.combo-box-popup .list-cell { -fx-background-color: #0b0b0b; -fx-text-fill: -text; }
+.combo-box-popup .list-cell:filled:hover, .combo-box-popup .list-cell:filled:selected { -fx-background-color: #2a2110; -fx-text-fill: -gold-light; }
+
+/* area chart */
+.chart { -fx-padding: 4; }
+.chart-plot-background { -fx-background-color: transparent; }
+.chart-horizontal-grid-lines, .chart-vertical-grid-lines { -fx-stroke: rgba(217,172,76,0.22); -fx-stroke-dash-array: 4 5; }
+.chart-horizontal-zero-line, .chart-vertical-zero-line { -fx-stroke: rgba(217,172,76,0.3); }
+.axis { -fx-tick-label-fill: -muted; -fx-font-size: 11px; }
+.axis-tick-mark, .axis-minor-tick-mark { -fx-stroke: transparent; }
+.axis:left, .axis:bottom { -fx-border-color: transparent; }
+
+.default-color0.chart-series-area-line { -fx-stroke: #e3b455; -fx-stroke-width: 2.4px; }
+.default-color0.chart-series-area-fill { -fx-fill: linear-gradient(to bottom, rgba(227,180,85,0.45), rgba(227,180,85,0.03)); }
+.default-color0.chart-area-symbol { -fx-background-color: #e3b455, #0a0a0a; -fx-background-insets: 0, 2; -fx-background-radius: 6px; -fx-padding: 4px; }
+
+/* donut */
+.chart-pie { -fx-border-color: #0a0a0a; -fx-border-width: 1.5; }
+.donut-hole { -fx-fill: #0a0a0a; }
+.donut-value { -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; }
+.donut-caption { -fx-text-fill: -muted; -fx-font-size: 10.5px; }
+.legend-name { -fx-text-fill: -text; -fx-font-size: 13px; }
+.legend-pct  { -fx-text-fill: -text; -fx-font-size: 13px; }
+
+/* quick actions */
+.action-card {
+    -fx-background-color: -panel; -fx-background-radius: 12;
+    -fx-border-color: -gold; -fx-border-width: 1.2; -fx-border-radius: 12;
+    -fx-padding: 12 16 12 16; -fx-alignment: CENTER_LEFT; -fx-cursor: hand;
+}
+.action-card:hover { -fx-background-color: #17130a; -fx-border-color: -gold-light; }
+.action-icon { -fx-text-fill: -gold; -fx-font-size: 24px; }
+.action-title { -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; }
+.action-sub { -fx-text-fill: -muted; -fx-font-size: 11.5px; }
+
+/* placeholder pages */
+.label.h1 { -fx-text-fill: -gold; }
