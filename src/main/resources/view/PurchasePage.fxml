@@ -1,14 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="lk.ijse.first_sem_final_project.controller.PurchaseController"
-            prefHeight="400.0" prefWidth="600.0">
+<VBox spacing="16" styleClass="pg-page" stylesheets="@../style/pages.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.PurchaseController">
+    <padding><Insets bottom="20" left="24" right="24" top="22" /></padding>
 
-</AnchorPane>
+    <!-- ===== header ===== -->
+    <HBox alignment="TOP_LEFT">
+        <VBox spacing="3">
+            <Label styleClass="pg-title" text="Purchases" />
+            <Label styleClass="pg-sub" text="Record stock bought from suppliers" />
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label styleClass="pg-muted" text="📅" />
+            <Label fx:id="lblDate" styleClass="pg-clock" text="--" />
+            <Label styleClass="pg-muted" text="🕙" />
+            <Label fx:id="lblTime" styleClass="pg-clock" text="--" />
+        </HBox>
+    </HBox>
+
+    <!-- ===== search + buttons ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="14">
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="pg-search" HBox.hgrow="ALWAYS">
+            <Label styleClass="pg-search-icon" text="🔍" />
+            <TextField fx:id="txtSearch" promptText="Search purchases..." styleClass="pg-search-field" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <Button onAction="#handleAdd" styleClass="pg-btn-gold" text="＋ New Purchase" />
+        <Button onAction="#handleExport" styleClass="pg-btn-outline" text="⭳ Export" />
+    </HBox>
+
+    <!-- ===== table card ===== -->
+    <VBox spacing="10" styleClass="pg-card" VBox.vgrow="ALWAYS">
+        <TableView fx:id="table" styleClass="pg-table" VBox.vgrow="ALWAYS" />
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="lblCount" styleClass="pg-muted" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox fx:id="pagination" alignment="CENTER_RIGHT" spacing="8" />
+        </HBox>
+    </VBox>
+</VBox>
