@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20" stylesheets="@../style/Login.css" styleClass="page-container" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.ReportController">
+    <padding>
+        <Insets bottom="30" left="30" right="30" top="30" />
+    </padding>
+
+    <!-- Header -->
+    <VBox spacing="5">
+        <Label styleClass="page-title" text="Reports" />
+        <Label styleClass="page-subtitle" text="Generate and view business reports" />
+    </VBox>
+
+    <!-- Cards Grid -->
+    <GridPane hgap="20" vgap="20">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="SOMETIMES" />
+        </rowConstraints>
+
+        <!-- Sales Report Card -->
+        <VBox onMouseClicked="#onSalesReport" styleClass="report-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label styleClass="report-icon" text="📊" />
+            <Label styleClass="report-title" text="Sales Report" />
+            <Label styleClass="report-desc" text="View sales summary" />
+        </VBox>
+
+        <!-- Purchase Report Card -->
+        <VBox onMouseClicked="#onPurchaseReport" styleClass="report-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <Label styleClass="report-icon" text="📦" />
+            <Label styleClass="report-title" text="Purchase Report" />
+            <Label styleClass="report-desc" text="View purchase summary" />
+        </VBox>
+
+        <!-- Stock Report Card -->
+        <VBox onMouseClicked="#onStockReport" styleClass="report-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+            <Label styleClass="report-icon" text="📈" />
+            <Label styleClass="report-title" text="Stock Report" />
+            <Label styleClass="report-desc" text="View stock-details" />
+        </VBox>
+
+        <!-- Customer Report Card -->
+        <VBox onMouseClicked="#onCustomerReport" styleClass="report-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <Label styleClass="report-icon" text="👤" />
+            <Label styleClass="report-title" text="Customer Report" />
+            <Label styleClass="report-desc" text="View customer details" />
+        </VBox>
+
+        <!-- Supplier Report Card -->
+        <VBox onMouseClicked="#onSupplierReport" styleClass="report-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label styleClass="report-icon" text="🚚" />
+            <Label styleClass="report-title" text="Supplier Report" />
+            <Label styleClass="report-desc" text="View supplier details" />
+        </VBox>
+
+        <!-- Product Report Card -->
+        <VBox onMouseClicked="#onProductReport" styleClass="report-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <Label styleClass="report-icon" text="🏷️" />
+            <Label styleClass="report-title" text="Product Report" />
+            <Label styleClass="report-desc" text="View product details" />
+        </VBox>
+    </GridPane>
+</VBox>

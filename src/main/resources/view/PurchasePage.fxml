@@ -16,7 +16,7 @@
     <HBox alignment="TOP_LEFT">
         <VBox spacing="3">
             <Label styleClass="pg-title" text="Purchases" />
-            <Label styleClass="pg-sub" text="Record stock bought from suppliers" />
+            <Label styleClass="pg-sub" text="Record stock bought. Double-click to view its items" />
         </VBox>
         <Region HBox.hgrow="ALWAYS" />
         <HBox alignment="CENTER_RIGHT" spacing="10">

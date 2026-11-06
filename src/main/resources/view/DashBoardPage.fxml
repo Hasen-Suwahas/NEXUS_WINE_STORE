@@ -43,8 +43,8 @@
             <ToggleButton toggleGroup="$navGroup" text="🧾   Purchases" userData="Purchase" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="🚚   Suppliers" userData="Supplier" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="💳   Payments" userData="Payment" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="📊   Reports" userData="Report" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="👤   Users" userData="User" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="⚙    Report" userData="Report" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
@@ -169,10 +169,10 @@
                         <VBox><Label text="New Sale" styleClass="action-title"/><Label text="Process new orders" styleClass="action-sub"/></VBox>
                      </HBox></graphic>
                   </Button>
-                  <Button styleClass="action-card" userData="Setting" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
+                  <Button styleClass="action-card" userData="Report" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
                      <graphic><HBox spacing="12" alignment="CENTER_LEFT">
                         <Label text="📊" styleClass="action-icon"/>
-                        <VBox><Label text="Store Management" styleClass="action-title"/><Label text="Manage store info" styleClass="action-sub"/></VBox>
+                        <VBox><Label text="Reports" styleClass="action-title"/><Label text="Sales and profit reports" styleClass="action-sub"/></VBox>
                      </HBox></graphic>
                   </Button>
                </HBox>
