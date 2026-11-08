@@ -162,7 +162,7 @@ public class LoginController {
             stage.setMinHeight(760);
 
             Object c = loader.getController();
-            if (c instanceof DashBoardPageController dc) {
+            if (c instanceof DashBoardController dc) {
                 dc.setCurrentUser(user.fullName(), user.role());
                 stage.setOnCloseRequest(e -> dc.shutdown());
             }

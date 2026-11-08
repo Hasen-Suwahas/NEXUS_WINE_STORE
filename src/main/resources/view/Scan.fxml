@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox styleClass="panel" spacing="8" prefWidth="290" minWidth="290" maxWidth="290"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      stylesheets="@../style/Scan.css"
+      fx:controller="lk.ijse.first_sem_final_project.controller.ScanController">
+
+    <Label text="🔍  Quick Scan" styleClass="panel-title"/>
+
+    <TextField fx:id="txtScan" promptText="Scan bottle barcode…" styleClass="qs-field" onAction="#onScan"/>
+    <Label fx:id="lblStatus" text="Ready" styleClass="qs-status"/>
+
+    <!-- last scanned bottle -->
+    <VBox styleClass="qs-card" spacing="3">
+        <Label fx:id="lblName" text="—" styleClass="qs-name" wrapText="true"/>
+        <Label fx:id="lblMeta" text="" styleClass="muted" wrapText="true"/>
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="lblPrice" text="LKR 0.00" styleClass="qs-price"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblStock" text="" styleClass="qs-stock"/>
+        </HBox>
+    </VBox>
+
+    <!-- recent scans -->
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Recent scans" styleClass="muted"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Clear" styleClass="qs-link" onAction="#clearRecent" focusTraversable="false"/>
+    </HBox>
+    <VBox fx:id="recentBox" spacing="4"/>
+</VBox>

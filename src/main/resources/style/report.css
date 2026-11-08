@@ -1,0 +1,21 @@
+/* ===== Reports page – card grid (black & gold) ===== */
+.report-card {
+    -fx-background-color: #0a0a0a; -fx-background-radius: 14;
+    -fx-border-color: #8f7330; -fx-border-width: 1.4; -fx-border-radius: 14;
+    -fx-cursor: hand; -fx-padding: 20;
+}
+.report-card:hover {
+    -fx-background-color: #14110a; -fx-border-color: #f3d77e;
+    -fx-effect: dropshadow(gaussian, rgba(217,172,76,0.28), 18, 0.1, 0, 0);
+}
+.report-card:focus { -fx-background-insets: 0; }
+.report-icon  { -fx-text-fill: #e3b455; -fx-font-size: 36px; }
+.report-title { -fx-text-fill: #f4ead0; -fx-font-size: 18px; -fx-font-weight: bold; }
+.report-sub   { -fx-text-fill: #b9ad8c; -fx-font-size: 12.5px; }
+
+.report-summary { -fx-text-fill: #f0cf7a; -fx-font-size: 13.5px; -fx-font-weight: bold; }
+
+/* period box (also defined in dashboard.css – repeated so this page never depends on it) */
+.gold-combo { -fx-background-color: #0b0b0b; -fx-border-color: #6d5724; -fx-border-radius: 8; -fx-background-radius: 8; }
+.gold-combo .list-cell { -fx-text-fill: #f4ead0; -fx-background-color: transparent; }
+.gold-combo .arrow { -fx-background-color: #d9ac4c; }

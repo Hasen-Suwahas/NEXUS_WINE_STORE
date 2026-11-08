@@ -8,16 +8,15 @@
 
 <StackPane styleClass="app-bg" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            stylesheets="@../style/dashboard.css"
-           fx:controller="lk.ijse.first_sem_final_project.controller.DashBoardPageController">
+           fx:controller="lk.ijse.first_sem_final_project.controller.DashBoardController">
    <padding><Insets top="14" right="22" bottom="22" left="22"/></padding>
 
    <fx:define><ToggleGroup fx:id="navGroup"/></fx:define>
 
    <VBox spacing="-14">
-      <!-- gold name badge sitting on the frame -->
+      <!-- store name tab sitting on top of the frame -->
       <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 0 4;">
-         <HBox styleClass="store-badge" spacing="10" alignment="CENTER">
-            <Label text="👑" styleClass="badge-crown"/>
+         <HBox styleClass="store-badge" alignment="CENTER">
             <Label fx:id="lblBadge" text="Nexus Wine Store" styleClass="badge-text"/>
          </HBox>
       </HBox>
@@ -25,26 +24,26 @@
       <HBox styleClass="shell" VBox.vgrow="ALWAYS">
 
          <!-- ================= SIDEBAR ================= -->
-         <VBox styleClass="sidebar" prefWidth="215" minWidth="215" spacing="5">
+         <VBox styleClass="sidebar" prefWidth="215" minWidth="215" spacing="4">
             <padding><Insets top="26" right="14" bottom="18" left="14"/></padding>
 
-            <VBox alignment="CENTER" spacing="4">
-               <StackPane styleClass="logo-ring"><Label text="👑" styleClass="logo-crown"/></StackPane>
+            <VBox alignment="CENTER" spacing="8">
+               <StackPane styleClass="logo-ring"><Label text="N" styleClass="logo-crown"/></StackPane>
                <Label fx:id="lblStoreName" text="Nexus Wine Store" styleClass="logo-text"/>
             </VBox>
-            <Region prefHeight="14"/>
+            <Region prefHeight="16"/>
 
-            <ToggleButton toggleGroup="$navGroup" text="⌂   Dashboard" userData="DashBoard" selected="true" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="👥   Customers" userData="Customer" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="🍷   Products" userData="Product" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="🗂   Categories" userData="Category" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="📦   Stock" userData="Stock" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="🛒   Sales" userData="Sale" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="🧾   Purchases" userData="Purchase" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="🚚   Suppliers" userData="Supplier" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="💳   Payments" userData="Payment" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="📊   Reports" userData="Report" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="👤   Users" userData="User" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Dashboard" userData="DashBoard" selected="true" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Customers" userData="Customer" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Products" userData="Product" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Categories" userData="Category" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Stock" userData="Stock" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Sales" userData="Sale" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Purchases" userData="Purchase" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Suppliers" userData="Supplier" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Payments" userData="Payment" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Reports" userData="Report" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
+            <ToggleButton toggleGroup="$navGroup" text="Users" userData="User" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
@@ -72,11 +71,9 @@
                   </VBox>
                   <Region HBox.hgrow="ALWAYS"/>
                   <VBox alignment="TOP_RIGHT" spacing="4">
-                     <HBox spacing="14" alignment="CENTER_RIGHT">
-                        <Label text="📅" styleClass="muted"/>
+                     <HBox spacing="10" alignment="CENTER_RIGHT">
                         <Label fx:id="lblDate" text="--" styleClass="clock"/>
-                        <Label text="|" styleClass="muted"/>
-                        <Label text="🕙" styleClass="muted"/>
+                        <Label text="·" styleClass="muted"/>
                         <Label fx:id="lblTime" text="--" styleClass="clock"/>
                      </HBox>
                      <Label fx:id="lblLastUpdated" text="" styleClass="live-label"/>
@@ -85,54 +82,42 @@
 
                <!-- stat cards -->
                <HBox spacing="14">
-                  <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="14" alignment="CENTER_LEFT">
-                     <StackPane styleClass="stat-icon"><Label text="🍷" styleClass="stat-icon-text"/></StackPane>
-                     <VBox spacing="2">
-                        <Label text="Total Products" styleClass="stat-caption"/>
-                        <Label fx:id="lblTotalProducts" text="0" styleClass="stat-value"/>
-                     </VBox>
-                  </HBox>
-                  <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="14" alignment="CENTER_LEFT">
-                     <StackPane styleClass="stat-icon"><Label text="💰" styleClass="stat-icon-text"/></StackPane>
-                     <VBox spacing="2">
-                        <Label text="Total Sales Value" styleClass="stat-caption"/>
-                        <Label fx:id="lblSalesValue" text="LKR 0" styleClass="stat-value"/>
-                     </VBox>
-                  </HBox>
-                  <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="14" alignment="CENTER_LEFT">
-                     <StackPane styleClass="stat-icon"><Label text="📈" styleClass="stat-icon-text"/></StackPane>
-                     <VBox spacing="2">
-                        <Label text="Today’s Orders" styleClass="stat-caption"/>
-                        <Label fx:id="lblTodayOrders" text="0" styleClass="stat-value"/>
-                        <Label fx:id="lblTodayRevenue" text="LKR 0 today" styleClass="stat-sub"/>
-                     </VBox>
-                  </HBox>
-                  <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="14" alignment="CENTER_LEFT">
-                     <StackPane styleClass="stat-icon"><Label text="⚠" styleClass="stat-icon-text"/></StackPane>
-                     <VBox spacing="2">
-                        <Label text="Low Stock Items" styleClass="stat-caption"/>
-                        <Label fx:id="lblLowStock" text="0" styleClass="stat-value"/>
-                     </VBox>
-                  </HBox>
+                  <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="4">
+                     <Label text="Total Products" styleClass="stat-caption"/>
+                     <Label fx:id="lblTotalProducts" text="0" styleClass="stat-value"/>
+                  </VBox>
+                  <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="4">
+                     <Label text="Total Sales Value" styleClass="stat-caption"/>
+                     <Label fx:id="lblSalesValue" text="LKR 0" styleClass="stat-value"/>
+                  </VBox>
+                  <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="4">
+                     <Label text="Today’s Orders" styleClass="stat-caption"/>
+                     <Label fx:id="lblTodayOrders" text="0" styleClass="stat-value"/>
+                     <Label fx:id="lblTodayRevenue" text="LKR 0 today" styleClass="stat-sub"/>
+                  </VBox>
+                  <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" prefWidth="1" spacing="4">
+                     <Label text="Low Stock Items" styleClass="stat-caption"/>
+                     <Label fx:id="lblLowStock" text="0" styleClass="stat-value, stat-alert"/>
+                  </VBox>
                </HBox>
 
                <!-- charts -->
                <HBox spacing="14" VBox.vgrow="ALWAYS">
                   <VBox styleClass="panel" HBox.hgrow="ALWAYS" spacing="6">
                      <HBox alignment="CENTER_LEFT">
-                        <Label text="▮▮  Sales Overview" styleClass="panel-title"/>
+                        <Label text="Sales Overview" styleClass="panel-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <ComboBox fx:id="rangeCombo" prefWidth="140" styleClass="gold-combo"/>
                      </HBox>
                      <AreaChart fx:id="areaChart" legendVisible="false" animated="false" createSymbols="true"
-                                horizontalGridLinesVisible="true" verticalGridLinesVisible="true" VBox.vgrow="ALWAYS">
+                                horizontalGridLinesVisible="true" verticalGridLinesVisible="false" VBox.vgrow="ALWAYS">
                         <xAxis><CategoryAxis side="BOTTOM"/></xAxis>
                         <yAxis><NumberAxis fx:id="yAxis" side="LEFT"/></yAxis>
                      </AreaChart>
                   </VBox>
 
                   <VBox styleClass="panel" prefWidth="400" minWidth="400" spacing="6">
-                     <Label text="🍾  Stock by Category" styleClass="panel-title"/>
+                     <Label text="Stock by Category" styleClass="panel-title"/>
                      <HBox spacing="14" alignment="CENTER" VBox.vgrow="ALWAYS">
                         <StackPane prefWidth="190" minWidth="190" prefHeight="190" maxHeight="190">
                            <PieChart fx:id="pieChart" legendVisible="false" labelsVisible="false" animated="false"
@@ -146,34 +131,25 @@
                         <VBox fx:id="legendBox" spacing="11" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT"/>
                      </HBox>
                   </VBox>
+
+                  <!-- small barcode scan panel on the side -->
+                  <fx:include source="Scan.fxml"/>
                </HBox>
 
                <!-- quick actions -->
-               <Label text="🛠  Quick actions" styleClass="section-title"/>
+               <Label text="Quick actions" styleClass="section-title"/>
                <HBox spacing="14">
                   <Button styleClass="action-card" userData="Product" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
-                     <graphic><HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="🛒" styleClass="action-icon"/>
-                        <VBox><Label text="Add Product" styleClass="action-title"/><Label text="Add a new product" styleClass="action-sub"/></VBox>
-                     </HBox></graphic>
+                     <graphic><VBox spacing="2"><Label text="Add Product" styleClass="action-title"/><Label text="Add a new product" styleClass="action-sub"/></VBox></graphic>
                   </Button>
                   <Button styleClass="action-card" userData="Purchase" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
-                     <graphic><HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="🧾" styleClass="action-icon"/>
-                        <VBox><Label text="Purchase" styleClass="action-title"/><Label text="New purchase order" styleClass="action-sub"/></VBox>
-                     </HBox></graphic>
+                     <graphic><VBox spacing="2"><Label text="Purchase" styleClass="action-title"/><Label text="New purchase order" styleClass="action-sub"/></VBox></graphic>
                   </Button>
                   <Button styleClass="action-card" userData="Sale" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
-                     <graphic><HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="✔" styleClass="action-icon"/>
-                        <VBox><Label text="New Sale" styleClass="action-title"/><Label text="Process new orders" styleClass="action-sub"/></VBox>
-                     </HBox></graphic>
+                     <graphic><VBox spacing="2"><Label text="New Sale" styleClass="action-title"/><Label text="Process new orders" styleClass="action-sub"/></VBox></graphic>
                   </Button>
                   <Button styleClass="action-card" userData="Report" onAction="#quickAction" HBox.hgrow="ALWAYS" prefWidth="1" maxWidth="Infinity">
-                     <graphic><HBox spacing="12" alignment="CENTER_LEFT">
-                        <Label text="📊" styleClass="action-icon"/>
-                        <VBox><Label text="Reports" styleClass="action-title"/><Label text="Sales and profit reports" styleClass="action-sub"/></VBox>
-                     </HBox></graphic>
+                     <graphic><VBox spacing="2"><Label text="Reports" styleClass="action-title"/><Label text="Sales and profit reports" styleClass="action-sub"/></VBox></graphic>
                   </Button>
                </HBox>
             </VBox>

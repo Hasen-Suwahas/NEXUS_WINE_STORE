@@ -1,75 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="20" stylesheets="@../style/Login.css" styleClass="page-container" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.ReportController">
-    <padding>
-        <Insets bottom="30" left="30" right="30" top="30" />
-    </padding>
+<VBox spacing="16" styleClass="pg-page" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.ReportController">
+    <stylesheets>
+        <URL value="@../style/pages.css" />
+        <URL value="@../style/report.css" />
+    </stylesheets>
+    <padding><Insets bottom="22" left="26" right="26" top="22" /></padding>
 
-    <!-- Header -->
-    <VBox spacing="5">
-        <Label styleClass="page-title" text="Reports" />
-        <Label styleClass="page-subtitle" text="Generate and view business reports" />
+    <!-- ===== header ===== -->
+    <VBox spacing="3">
+        <Label fx:id="lblTitle" styleClass="pg-title" text="Reports" />
+        <Label fx:id="lblSub" styleClass="pg-sub" text="Generate and view business reports" />
     </VBox>
 
-    <!-- Cards Grid -->
-    <GridPane hgap="20" vgap="20">
-        <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
-        </columnConstraints>
-        <rowConstraints>
-            <RowConstraints vgrow="SOMETIMES" />
-            <RowConstraints vgrow="SOMETIMES" />
-        </rowConstraints>
+    <StackPane VBox.vgrow="ALWAYS">
 
-        <!-- Sales Report Card -->
-        <VBox onMouseClicked="#onSalesReport" styleClass="report-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
-            <Label styleClass="report-icon" text="📊" />
-            <Label styleClass="report-title" text="Sales Report" />
-            <Label styleClass="report-desc" text="View sales summary" />
-        </VBox>
+        <!-- ================= 6 REPORT CARDS ================= -->
+        <GridPane fx:id="cardsPane" hgap="18" vgap="18">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33" />
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="33.34" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50" vgrow="ALWAYS" />
+                <RowConstraints percentHeight="50" vgrow="ALWAYS" />
+            </rowConstraints>
 
-        <!-- Purchase Report Card -->
-        <VBox onMouseClicked="#onPurchaseReport" styleClass="report-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
-            <Label styleClass="report-icon" text="📦" />
-            <Label styleClass="report-title" text="Purchase Report" />
-            <Label styleClass="report-desc" text="View purchase summary" />
-        </VBox>
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="sales" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="🧾" />
+                        <Label styleClass="report-title" text="Sales Report" />
+                        <Label styleClass="report-sub" text="View sales summary" />
+                    </VBox>
+                </graphic>
+            </Button>
 
-        <!-- Stock Report Card -->
-        <VBox onMouseClicked="#onStockReport" styleClass="report-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
-            <Label styleClass="report-icon" text="📈" />
-            <Label styleClass="report-title" text="Stock Report" />
-            <Label styleClass="report-desc" text="View stock-details" />
-        </VBox>
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="purchase" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="🛒" />
+                        <Label styleClass="report-title" text="Purchase Report" />
+                        <Label styleClass="report-sub" text="View purchase summary" />
+                    </VBox>
+                </graphic>
+            </Button>
 
-        <!-- Customer Report Card -->
-        <VBox onMouseClicked="#onCustomerReport" styleClass="report-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
-            <Label styleClass="report-icon" text="👤" />
-            <Label styleClass="report-title" text="Customer Report" />
-            <Label styleClass="report-desc" text="View customer details" />
-        </VBox>
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="stock" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="📦" />
+                        <Label styleClass="report-title" text="Stock Report" />
+                        <Label styleClass="report-sub" text="View stock details" />
+                    </VBox>
+                </graphic>
+            </Button>
 
-        <!-- Supplier Report Card -->
-        <VBox onMouseClicked="#onSupplierReport" styleClass="report-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <Label styleClass="report-icon" text="🚚" />
-            <Label styleClass="report-title" text="Supplier Report" />
-            <Label styleClass="report-desc" text="View supplier details" />
-        </VBox>
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="customer" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="👤" />
+                        <Label styleClass="report-title" text="Customer Report" />
+                        <Label styleClass="report-sub" text="View customer details" />
+                    </VBox>
+                </graphic>
+            </Button>
 
-        <!-- Product Report Card -->
-        <VBox onMouseClicked="#onProductReport" styleClass="report-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
-            <Label styleClass="report-icon" text="🏷️" />
-            <Label styleClass="report-title" text="Product Report" />
-            <Label styleClass="report-desc" text="View product details" />
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="supplier" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="🚚" />
+                        <Label styleClass="report-title" text="Supplier Report" />
+                        <Label styleClass="report-sub" text="View supplier details" />
+                    </VBox>
+                </graphic>
+            </Button>
+
+            <Button maxHeight="Infinity" maxWidth="Infinity" onAction="#openReport" styleClass="report-card" userData="product" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="report-icon" text="🍷" />
+                        <Label styleClass="report-title" text="Product Report" />
+                        <Label styleClass="report-sub" text="View product details" />
+                    </VBox>
+                </graphic>
+            </Button>
+        </GridPane>
+
+        <!-- ================= ONE REPORT (shown after a card is clicked) ================= -->
+        <VBox fx:id="detailPane" managed="false" spacing="14" visible="false">
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <Button onAction="#back" styleClass="pg-btn-outline" text="←  Back to Reports" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#refresh" styleClass="pg-btn-outline" text="⟳ Refresh" />
+                <Button onAction="#export" styleClass="pg-btn-gold" text="⭳ Export" />
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="pg-search" HBox.hgrow="ALWAYS">
+                    <Label styleClass="pg-search-icon" text="🔍" />
+                    <TextField fx:id="txtSearch" promptText="Search in this report..." styleClass="pg-search-field" HBox.hgrow="ALWAYS" />
+                </HBox>
+                <ComboBox fx:id="periodCombo" prefWidth="160" styleClass="gold-combo" />
+            </HBox>
+
+            <Label fx:id="lblSummary" styleClass="report-summary" text="" />
+
+            <VBox spacing="10" styleClass="pg-card" VBox.vgrow="ALWAYS">
+                <TableView fx:id="reportTable" styleClass="pg-table" VBox.vgrow="ALWAYS" />
+            </VBox>
         </VBox>
-    </GridPane>
+    </StackPane>
 </VBox>
