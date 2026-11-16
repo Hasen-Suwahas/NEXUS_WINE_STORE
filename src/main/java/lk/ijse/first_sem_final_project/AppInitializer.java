@@ -10,11 +10,10 @@ import lk.ijse.first_sem_final_project.db.DBConnection;
 public class AppInitializer extends Application {
     public static void main(String[] args) {
         launch(args);
-
     }
     @Override
     public void start(Stage stage) throws Exception {
-        Parent load = FXMLLoader.load(getClass().getResource("/view/DashBoardPage.fxml"));
+        Parent load = FXMLLoader.load(getClass().getResource("/view/Report.fxml"));
 
         stage.setTitle("Nexus_Wine_Store");
         stage.setScene(new Scene(load));

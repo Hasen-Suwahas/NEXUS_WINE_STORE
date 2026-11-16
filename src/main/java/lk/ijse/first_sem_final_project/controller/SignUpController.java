@@ -36,7 +36,7 @@ public class SignUpController {
     private static final String DB_URL  = "jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
-    private static final String LOGIN_FXML = "/view/LoginPage.fxml";
+    private static final String LOGIN_FXML = "/view/Login.fxml";
     private static final String DEFAULT_ROLE = "Cashier";   // role given to every new account
     private static final String FIRST_USER_ROLE = "Admin";  // the very first account becomes Admin
 

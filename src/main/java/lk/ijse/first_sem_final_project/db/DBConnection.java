@@ -7,7 +7,7 @@ public class DBConnection {
     private static DBConnection dbConnection;
     private final Connection connection;
 
-    private String url = "jdbc:mysql://localhost:3306/nexus_vain_store?";
+    private String url = "jdbc:mysql://localhost:3306/nexus_wine_store?";
     private String user ="root";
     private String password = "ijse@1234";
 

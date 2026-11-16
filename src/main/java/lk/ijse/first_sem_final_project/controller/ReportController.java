@@ -1,405 +1,394 @@
 package lk.ijse.first_sem_final_project.controller;
 
-
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
+/**
+ * Reports page: pick a report, pick a period, press Generate, export to CSV.
+ *
+ * Tables / columns used (edit the SQL in the report methods if yours differ):
+ *   sales(sale_id, sale_date, order_status, total_amount)
+ *   sale_items(sale_id, product_id, quantity, unit_price)
+ *   products(product_id, product_name, unit_price, category_id, reorder_level)
+ *   categories(category_id, category_name)
+ *   stock(product_id, quantity)
+ */
 public class ReportController {
 
-    // EDIT THESE (same values you use in your LoginController)
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/nexus_vain_store?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "PUT_YOUR_MYSQL_PASSWORD_HERE";
+    private static final String SALES = "Sales report";
+    private static final String DAILY = "Daily sales summary";
+    private static final String TOP   = "Top selling products";
+    private static final String STOCK = "Stock report";
+    private static final String LOW   = "Low stock report";
 
+    private static final String NOT_CANCELLED = " UPPER(COALESCE(s.order_status,'')) <> 'CANCELLED' ";
+    private static final DateTimeFormatter DAY      = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter DAY_TIME = DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm a", Locale.ENGLISH);
 
-    /** always a NEW connection, so it is safe to close it after each report */
-    private static Connection openConnection() throws SQLException {
-        if ("PUT_YOUR_MYSQL_PASSWORD_HERE".equals(DB_PASS))
-            throw new SQLException("Put your MySQL password in ReportController.DB_PASS");
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-    }
+    private static final String ERR_COLOR = "#e0786b";
+    private static final String MUTED     = "#8f8677";
 
+    /** One finished report: table content plus three summary figures. */
+    private record Result(List<String> headers, List<Boolean> numeric, List<List<String>> rows,
+                          String[] statCaptions, String[] statValues) {}
 
-    // ------------------------------------------------------------------ report definitions
-    /**
-     * @param dateCol   column used by the period filter (null = report has no period)
-     * @param types     one letter per column: T = text, N = whole number, M = money
-     * @param totalCol  index of the money column to add up (-1 = none)
-     * The token DATE-comment inside the SQL is replaced by  "AND DATE(dateCol) >= ?"  (or removed for All Time).
-     */
-    private record Def(String title, String subtitle, String sql, String dateCol,
-                       String[] headers, String types, int totalCol, String totalLabel) {}
+    @FXML private ComboBox<String> cmbReport;
+    @FXML private DatePicker dpFrom, dpTo;
+    @FXML private HBox boxDates;
+    @FXML private Button btnGenerate, btnExport;
+    @FXML private Label lblTitle, lblSub, lblStatus;
+    @FXML private Label lblCap1, lblCap2, lblCap3, lblVal1, lblVal2, lblVal3;
+    @FXML private TableView<ObservableList<String>> tblReport;
 
-
-    private record RowData(List<String> cells, double total) {}
-
-
-    private static final Map<String, Def> REPORTS = new LinkedHashMap<>();
-
-
-    private static final String NOT_CANCELLED = "UPPER(COALESCE(s.order_status,'')) <> 'CANCELLED'";
-
-
-    static {
-        REPORTS.put("sales", new Def("Sales Report", "Every sale with its total and payment status",
-                "SELECT CONCAT('SL', LPAD(s.sale_id,3,'0')), CAST(DATE(s.sale_date) AS CHAR), "
-                        + "COALESCE(cu.customer_name,'Walk-in'), COALESCE(u.full_name,'-'), "
-                        + "COALESCE(s.total_amount,0), COALESCE(p.paid,0), COALESCE(s.order_status,'') "
-                        + "FROM sales s "
-                        + "LEFT JOIN customers cu ON cu.customer_id = s.customer_id "
-                        + "LEFT JOIN users u ON u.user_id = s.user_id "
-                        + "LEFT JOIN (SELECT sale_id, SUM(amount_paid) AS paid FROM payments GROUP BY sale_id) p ON p.sale_id = s.sale_id "
-                        + "WHERE " + NOT_CANCELLED + " /*DATE*/ "
-                        + "ORDER BY s.sale_date DESC, s.sale_id DESC",
-                "s.sale_date",
-                new String[]{"Sale", "Date", "Customer", "Cashier", "Total (LKR)", "Paid (LKR)", "Status"},
-                "TTTTMMT", 4, "Total sales"));
-
-
-        REPORTS.put("purchase", new Def("Purchase Report", "Every purchase from your suppliers",
-                "SELECT CONCAT('PU', LPAD(pu.purchase_id,3,'0')), CAST(DATE(pu.purchase_date) AS CHAR), "
-                        + "COALESCE(su.supplier_name,'-'), COALESCE(u.full_name,'-'), COALESCE(i.units,0), COALESCE(pu.total_amount,0) "
-                        + "FROM purchases pu "
-                        + "LEFT JOIN suppliers su ON su.supplier_id = pu.supplier_id "
-                        + "LEFT JOIN users u ON u.user_id = pu.user_id "
-                        + "LEFT JOIN (SELECT purchase_id, SUM(quantity) AS units FROM purchase_items GROUP BY purchase_id) i ON i.purchase_id = pu.purchase_id "
-                        + "WHERE 1 = 1 /*DATE*/ "
-                        + "ORDER BY pu.purchase_date DESC, pu.purchase_id DESC",
-                "pu.purchase_date",
-                new String[]{"Purchase", "Date", "Supplier", "Received By", "Units", "Total (LKR)"},
-                "TTTTNM", 5, "Total purchases"));
-
-
-        REPORTS.put("stock", new Def("Stock Report", "Current stock level of every product",
-                "SELECT p.product_name, COALESCE(cat.category_name,'-'), COALESCE(s.qty,0), COALESCE(p.reorder_level,0), "
-                        + "COALESCE(s.qty,0) * COALESCE(p.cost_price,0), "
-                        + "CASE WHEN COALESCE(s.qty,0) <= 0 THEN 'Out of Stock' "
-                        + "WHEN COALESCE(s.qty,0) <= COALESCE(p.reorder_level,0) THEN 'Low Stock' ELSE 'In Stock' END "
-                        + "FROM products p "
-                        + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
-                        + "LEFT JOIN (SELECT product_id, SUM(quantity) AS qty FROM stock GROUP BY product_id) s ON s.product_id = p.product_id "
-                        + "ORDER BY COALESCE(s.qty,0), p.product_name",
-                null,
-                new String[]{"Product", "Category", "Quantity", "Reorder Level", "Stock Value (LKR)", "Status"},
-                "TTNNMT", 4, "Total stock value"));
-
-
-        REPORTS.put("customer", new Def("Customer Report", "What each customer has bought",
-                "SELECT cu.customer_name, COALESCE(cu.phone,'-'), COUNT(s.sale_id), COALESCE(SUM(s.total_amount),0), "
-                        + "COALESCE(CAST(DATE(MAX(s.sale_date)) AS CHAR),'-') "
-                        + "FROM customers cu "
-                        + "LEFT JOIN sales s ON s.customer_id = cu.customer_id AND " + NOT_CANCELLED + " /*DATE*/ "
-                        + "GROUP BY cu.customer_id, cu.customer_name, cu.phone "
-                        + "ORDER BY SUM(s.total_amount) DESC, cu.customer_name",
-                "s.sale_date",
-                new String[]{"Customer", "Phone", "Orders", "Total Spent (LKR)", "Last Purchase"},
-                "TTNMT", 3, "Total from customers"));
-
-
-        REPORTS.put("supplier", new Def("Supplier Report", "What you bought from each supplier",
-                "SELECT su.supplier_name, COALESCE(su.contact_person,'-'), COALESCE(su.phone,'-'), "
-                        + "COUNT(pu.purchase_id), COALESCE(SUM(pu.total_amount),0) "
-                        + "FROM suppliers su "
-                        + "LEFT JOIN purchases pu ON pu.supplier_id = su.supplier_id /*DATE*/ "
-                        + "GROUP BY su.supplier_id, su.supplier_name, su.contact_person, su.phone "
-                        + "ORDER BY SUM(pu.total_amount) DESC, su.supplier_name",
-                "pu.purchase_date",
-                new String[]{"Supplier", "Contact Person", "Phone", "Purchases", "Total Bought (LKR)"},
-                "TTTNM", 4, "Total bought"));
-
-
-        REPORTS.put("product", new Def("Product Report", "Sales, cost and profit of every product",
-                "SELECT p.product_name, COALESCE(cat.category_name,'-'), COALESCE(x.qty,0), COALESCE(x.revenue,0), "
-                        + "COALESCE(x.qty,0) * COALESCE(p.cost_price,0), "
-                        + "COALESCE(x.revenue,0) - COALESCE(x.qty,0) * COALESCE(p.cost_price,0) "
-                        + "FROM products p "
-                        + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
-                        + "LEFT JOIN (SELECT si.product_id, SUM(si.quantity) AS qty, SUM(si.subtotal) AS revenue "
-                        + "           FROM sale_items si JOIN sales s ON s.sale_id = si.sale_id "
-                        + "           WHERE " + NOT_CANCELLED + " /*DATE*/ GROUP BY si.product_id) x ON x.product_id = p.product_id "
-                        + "ORDER BY COALESCE(x.revenue,0) DESC, p.product_name",
-                "s.sale_date",
-                new String[]{"Product", "Category", "Qty Sold", "Revenue (LKR)", "Cost (LKR)", "Profit (LKR)"},
-                "TTNMMM", 5, "Total profit"));
-    }
-
-
-    private static final List<String> PERIODS =
-            List.of("Today", "Last 7 Days", "Last 30 Days", "This Month", "This Year", "All Time");
-
-
-    // ------------------------------------------------------------------ FXML
-    @FXML private Label lblTitle, lblSub, lblSummary;
-    @FXML private javafx.scene.layout.GridPane cardsPane;
-    @FXML private VBox detailPane;
-    @FXML private TextField txtSearch;
-    @FXML private ComboBox<String> periodCombo;
-    @FXML private TableView<RowData> reportTable;
-
-
-    private final ObservableList<RowData> rows = FXCollections.observableArrayList();
-    private FilteredList<RowData> filtered;
-    private Def current;
-
+    private Result lastResult;
+    private String lastTitle = "report";
+    private int requestId = 0;          // used to ignore results of an older, slower request
 
     @FXML
     public void initialize() {
-        reportTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        reportTable.setFixedCellSize(46);
-        reportTable.setPlaceholder(new Label("No data for this report"));
+        dpTo.setValue(LocalDate.now());
+        dpFrom.setValue(LocalDate.now().minusDays(29));
 
-
-        periodCombo.getItems().addAll(PERIODS);
-        periodCombo.getSelectionModel().select("Last 30 Days");
-        periodCombo.valueProperty().addListener((o, oldV, newV) -> {
-            if (newV != null && current != null) load();
+        cmbReport.getItems().addAll(SALES, DAILY, TOP, STOCK, LOW);
+        cmbReport.getSelectionModel().selectFirst();
+        cmbReport.valueProperty().addListener((o, a, v) -> {
+            if (v != null) runReport();
         });
 
+        tblReport.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        tblReport.setPlaceholder(new Label("Nothing to show for this selection"));
+        btnExport.setDisable(true);
 
-        filtered = new FilteredList<>(rows, r -> true);
-        reportTable.setItems(filtered);
-        txtSearch.textProperty().addListener((o, oldV, newV) -> applySearch(newV));
-
-
-        showCards();
+        Platform.runLater(this::runReport);
     }
 
-
-    // ------------------------------------------------------------------ cards <-> report
-    @FXML
-    private void openReport(ActionEvent e) {
-        String key = (String) ((Node) e.getSource()).getUserData();
-        current = REPORTS.get(key);
-        if (current == null) return;
-
-
-        lblTitle.setText(current.title());
-        lblSub.setText(current.subtitle());
-        boolean hasPeriod = current.dateCol() != null;
-        periodCombo.setVisible(hasPeriod);
-        periodCombo.setManaged(hasPeriod);
-        txtSearch.clear();
-        buildColumns(current);
-
-
-        cardsPane.setVisible(false);
-        cardsPane.setManaged(false);
-        detailPane.setVisible(true);
-        detailPane.setManaged(true);
-        load();
-    }
-
+    // ---------------- buttons ----------------
 
     @FXML
-    private void back() { showCards(); }
-
-
-    private void showCards() {
-        current = null;
-        rows.clear();
-        lblTitle.setText("Reports");
-        lblSub.setText("Generate and view business reports");
-        detailPane.setVisible(false);
-        detailPane.setManaged(false);
-        cardsPane.setVisible(true);
-        cardsPane.setManaged(true);
+    private void generate(ActionEvent e) {
+        runReport();
     }
 
-
+    /** Today / 7 days / 30 days / This month chips. */
     @FXML
-    private void refresh() { if (current != null) load(); }
-
-
-    // ------------------------------------------------------------------ table columns
-    private void buildColumns(Def def) {
-        reportTable.getColumns().clear();
-        for (int i = 0; i < def.headers().length; i++) {
-            final int idx = i;
-            TableColumn<RowData, String> col = new TableColumn<>(def.headers()[i]);
-            col.setSortable(false);
-            col.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().cells().get(idx)));
-            if ("Status".equals(def.headers()[i])) {
-                col.setCellFactory(tc -> new TableCell<>() {
-                    @Override protected void updateItem(String s, boolean empty) {
-                        super.updateItem(s, empty);
-                        if (empty || s == null || s.isBlank()) { setGraphic(null); return; }
-                        Label badge = new Label(toTitle(s));
-                        badge.getStyleClass().addAll("pg-badge", badgeClass(s));
-                        setGraphic(badge);
-                    }
-                });
-            }
-            reportTable.getColumns().add(col);
-        }
-    }
-
-
-    private static String toTitle(String s) {
-        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase().replace("stock", "Stock");
-    }
-
-
-    private static String badgeClass(String s) {
-        String t = s.toLowerCase();
-        if (t.contains("cancel") || t.contains("unpaid") || t.contains("low") || t.contains("out")) return "pg-badge-red";
-        if (t.contains("in stock") || t.equals("completed") || t.equals("paid") || t.equals("active")) return "pg-badge-green";
-        return "pg-badge-gold";
-    }
-
-
-    // ------------------------------------------------------------------ load data (background)
-    private LocalDate startDate() {
+    private void quickRange(ActionEvent e) {
+        String key = String.valueOf(((Node) e.getSource()).getUserData());
         LocalDate today = LocalDate.now();
-        String p = periodCombo.getValue() == null ? "All Time" : periodCombo.getValue();
-        switch (p) {
-            case "Today":        return today;
-            case "Last 7 Days":  return today.minusDays(6);
-            case "Last 30 Days": return today.minusDays(29);
-            case "This Month":   return today.withDayOfMonth(1);
-            case "This Year":    return today.withDayOfYear(1);
-            default:             return null;
+        LocalDate from = switch (key) {
+            case "0"  -> today;
+            case "7"  -> today.minusDays(6);
+            case "30" -> today.minusDays(29);
+            default   -> today.withDayOfMonth(1);
+        };
+        dpFrom.setValue(from);
+        dpTo.setValue(today);
+        runReport();
+    }
+
+    @FXML
+    private void exportCsv(ActionEvent e) {
+        if (lastResult == null || lastResult.rows().isEmpty()) return;
+
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Save report");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV file", "*.csv"));
+        fc.setInitialFileName(lastTitle.toLowerCase().replace(' ', '-') + "-" + LocalDate.now() + ".csv");
+        File file = fc.showSaveDialog(btnExport.getScene().getWindow());
+        if (file == null) return;
+
+        try (BufferedWriter w = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            w.write('\uFEFF'); // lets Excel read the file as UTF-8
+            w.write(csvLine(lastResult.headers(), null));
+            w.newLine();
+            for (List<String> row : lastResult.rows()) {
+                w.write(csvLine(row, lastResult.numeric()));
+                w.newLine();
+            }
+            setStatus("Saved " + file.getName(), false);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            setStatus("Could not save the file", true);
         }
     }
 
+    private static String csvLine(List<String> cells, List<Boolean> numeric) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cells.size(); i++) {
+            String v = cells.get(i) == null ? "" : cells.get(i);
+            if (numeric != null && numeric.get(i)) v = v.replace(",", "");   // plain numbers for Excel
+            if (v.contains(",") || v.contains("\"") || v.contains("\n")) v = "\"" + v.replace("\"", "\"\"") + "\"";
+            if (i > 0) sb.append(',');
+            sb.append(v);
+        }
+        return sb.toString();
+    }
 
-    private void load() {
-        final Def def = current;
-        final LocalDate from = def.dateCol() == null ? null : startDate();
+    // ---------------- running a report ----------------
 
+    private void runReport() {
+        final String type = cmbReport.getValue();
+        if (type == null) return;
 
-        reportTable.setPlaceholder(new Label("Loading..."));
-        Task<List<RowData>> task = new Task<>() {
-            @Override protected List<RowData> call() throws Exception {
-                try (Connection c = openConnection()) { return ReportController.this.run(c, def,from); }
-            }
+        final boolean needsDates = !(STOCK.equals(type) || LOW.equals(type));
+        boxDates.setDisable(!needsDates);
+        boxDates.setOpacity(needsDates ? 1 : 0.4);
+
+        final LocalDate from = dpFrom.getValue();
+        final LocalDate to = dpTo.getValue();
+        if (needsDates) {
+            if (from == null || to == null) { setStatus("Pick both dates first", true); return; }
+            if (from.isAfter(to))           { setStatus("The start date is after the end date", true); return; }
+        }
+
+        final int myId = ++requestId;
+        setBusy(true);
+
+        Task<Result> task = new Task<>() {
+            @Override protected Result call() throws Exception { return build(type, from, to); }
         };
-        task.setOnSucceeded(e -> {
-            if (current != def) return;                      // user already went back / opened another report
-            rows.setAll(task.getValue());
-            reportTable.setPlaceholder(new Label("No data for this report"));
-            applySearch(txtSearch.getText());
+        task.setOnSucceeded(ev -> {
+            if (myId != requestId) return;          // a newer request is running, drop this one
+            show(task.getValue(), type, needsDates, from, to);
+            setBusy(false);
         });
-        task.setOnFailed(e -> {
-            task.getException().printStackTrace();
-            String why = task.getException().getMessage();
-            reportTable.setPlaceholder(new Label("⚠ Cannot load report – " + (why == null ? "database error" : why)));
+        task.setOnFailed(ev -> {
+            if (myId != requestId) return;
+            Throwable ex = task.getException();
+            ex.printStackTrace();
+            String why = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+            if (why.length() > 120) why = why.substring(0, 120) + "…";
+            setStatus("Could not load the report: " + why, true);
+            setBusy(false);
         });
-        Thread t = new Thread(task, "report-load");
+        Thread t = new Thread(task, "report-loader");
         t.setDaemon(true);
         t.start();
     }
 
+    private Result build(String type, LocalDate from, LocalDate to) throws SQLException {
+        try (Connection c = lk.ijse.first_sem_final_project.db.DBConnection.getInstance().getConnection()) {
+            return switch (type) {
+                case SALES -> salesReport(c, from, to);
+                case DAILY -> dailyReport(c, from, to);
+                case TOP   -> topProducts(c, from, to);
+                case STOCK -> stockReport(c, false);
+                default    -> stockReport(c, true);
+            };
+        }
+    }
 
-    private List<RowData> run(Connection c, Def def, LocalDate from) throws SQLException {
-        String sql = def.sql().replace("/*DATE*/", from == null ? "" : "AND DATE(" + def.dateCol() + ") >= ?");
-        List<RowData> out = new ArrayList<>();
+    /** start of "from" day, inclusive */
+    private static Timestamp start(LocalDate d) { return Timestamp.valueOf(d.atStartOfDay()); }
+    /** start of the day after "to", exclusive (so the whole "to" day is included) */
+    private static Timestamp end(LocalDate d)   { return Timestamp.valueOf(d.plusDays(1).atStartOfDay()); }
+
+    // ---------------- the reports ----------------
+
+    private Result salesReport(Connection c, LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT s.sale_id, s.sale_date, COALESCE(s.order_status,'') st, s.total_amount "
+                + "FROM sales s WHERE s.sale_date >= ? AND s.sale_date < ? AND" + NOT_CANCELLED
+                + "ORDER BY s.sale_date DESC";
+        List<List<String>> rows = new ArrayList<>();
+        double revenue = 0;
         try (PreparedStatement ps = c.prepareStatement(sql)) {
-            if (from != null) ps.setDate(1, java.sql.Date.valueOf(from));
+            ps.setTimestamp(1, start(from));
+            ps.setTimestamp(2, end(to));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    List<String> cells = new ArrayList<>();
-                    double total = 0;
-                    for (int i = 0; i < def.types().length(); i++) {
-                        cells.add(format(def.types().charAt(i), rs, i + 1));
-                        if (i == def.totalCol()) total = rs.getDouble(i + 1);
-                    }
-                    out.add(new RowData(cells, total));
+                    double amt = rs.getDouble("total_amount");
+                    revenue += amt;
+                    Timestamp ts = rs.getTimestamp("sale_date");
+                    rows.add(Arrays.asList(nz(rs.getString("sale_id")),
+                            ts == null ? "" : ts.toLocalDateTime().format(DAY_TIME),
+                            nz(rs.getString("st")), money(amt)));
                 }
             }
         }
-        return out;
+        double avg = rows.isEmpty() ? 0 : revenue / rows.size();
+        return new Result(List.of("Sale ID", "Date", "Status", "Amount (LKR)"),
+                List.of(false, false, false, true), rows,
+                new String[]{"Orders", "Revenue", "Average order"},
+                new String[]{count(rows.size()), "LKR " + money(revenue), "LKR " + money(avg)});
     }
 
-
-    private static String format(char type, ResultSet rs, int col) throws SQLException {
-        switch (type) {
-            case 'N':
-                return String.format("%,d", rs.getLong(col));
-            case 'M': {
-                double v = rs.getDouble(col);
-                return v == Math.rint(v) ? String.format("%,.0f", v) : String.format("%,.2f", v);
+    private Result dailyReport(Connection c, LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT DATE(s.sale_date) d, COUNT(*) n, COALESCE(SUM(s.total_amount),0) t "
+                + "FROM sales s WHERE s.sale_date >= ? AND s.sale_date < ? AND" + NOT_CANCELLED
+                + "GROUP BY DATE(s.sale_date) ORDER BY d";
+        List<List<String>> rows = new ArrayList<>();
+        long orders = 0;
+        double revenue = 0;
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setTimestamp(1, start(from));
+            ps.setTimestamp(2, end(to));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    long n = rs.getLong("n");
+                    double t = rs.getDouble("t");
+                    orders += n;
+                    revenue += t;
+                    rows.add(Arrays.asList(rs.getDate("d").toLocalDate().format(DAY), count(n),
+                            money(t), money(n == 0 ? 0 : t / n)));
+                }
             }
-            default: {
-                String s = rs.getString(col);
-                return s == null ? "-" : s;
+        }
+        return new Result(List.of("Date", "Orders", "Revenue (LKR)", "Average order (LKR)"),
+                List.of(false, true, true, true), rows,
+                new String[]{"Days with sales", "Orders", "Revenue"},
+                new String[]{count(rows.size()), count(orders), "LKR " + money(revenue)});
+    }
+
+    private Result topProducts(Connection c, LocalDate from, LocalDate to) throws SQLException {
+        String sql = "SELECT p.product_name, COALESCE(cat.category_name,'-') cat, "
+                + "SUM(si.quantity) units, SUM(si.quantity * si.unit_price) revenue "
+                + "FROM sale_items si "
+                + "JOIN sales s ON s.sale_id = si.sale_id "
+                + "JOIN products p ON p.product_id = si.product_id "
+                + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
+                + "WHERE s.sale_date >= ? AND s.sale_date < ? AND" + NOT_CANCELLED
+                + "GROUP BY p.product_id, p.product_name, cat.category_name "
+                + "ORDER BY units DESC LIMIT 20";
+        List<List<String>> rows = new ArrayList<>();
+        long units = 0;
+        double revenue = 0;
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setTimestamp(1, start(from));
+            ps.setTimestamp(2, end(to));
+            try (ResultSet rs = ps.executeQuery()) {
+                int rank = 1;
+                while (rs.next()) {
+                    long u = rs.getLong("units");
+                    double r = rs.getDouble("revenue");
+                    units += u;
+                    revenue += r;
+                    rows.add(Arrays.asList(String.valueOf(rank++), nz(rs.getString("product_name")),
+                            nz(rs.getString("cat")), count(u), money(r)));
+                }
             }
         }
+        return new Result(List.of("#", "Product", "Category", "Units sold", "Revenue (LKR)"),
+                List.of(false, false, false, true, true), rows,
+                new String[]{"Products listed", "Units sold", "Revenue"},
+                new String[]{count(rows.size()), count(units), "LKR " + money(revenue)});
     }
 
+    private Result stockReport(Connection c, boolean lowOnly) throws SQLException {
+        String sql = "SELECT p.product_name, COALESCE(cat.category_name,'-') cat, "
+                + "COALESCE(SUM(st.quantity),0) qty, p.reorder_level, p.unit_price "
+                + "FROM products p "
+                + "LEFT JOIN categories cat ON cat.category_id = p.category_id "
+                + "LEFT JOIN stock st ON st.product_id = p.product_id "
+                + "GROUP BY p.product_id, p.product_name, cat.category_name, p.reorder_level, p.unit_price "
+                + "ORDER BY p.product_name";
+        List<List<String>> rows = new ArrayList<>();
+        long units = 0, outCount = 0, toReorder = 0;
+        double value = 0;
+        try (PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                long qty = rs.getLong("qty");
+                long reorder = rs.getLong("reorder_level");
+                double price = rs.getDouble("unit_price");
+                String status = qty <= 0 ? "Out of stock" : qty <= reorder ? "Low" : "OK";
+                if (lowOnly && status.equals("OK")) continue;
 
-    // ------------------------------------------------------------------ search + summary line
-    private void applySearch(String text) {
-        String q = text == null ? "" : text.trim().toLowerCase();
-        filtered.setPredicate(r -> q.isEmpty() || r.cells().stream().anyMatch(cell -> cell.toLowerCase().contains(q)));
-        updateSummary();
-    }
-
-
-    private void updateSummary() {
-        if (current == null) { lblSummary.setText(""); return; }
-        double sum = 0;
-        for (RowData r : filtered) sum += r.total();
-        String text = filtered.size() + " records";
-        if (current.totalCol() >= 0)
-            text += "   •   " + current.totalLabel() + ":  LKR " + (sum == Math.rint(sum) ? String.format("%,.0f", sum) : String.format("%,.2f", sum));
-        lblSummary.setText(text);
-    }
-
-
-    // ------------------------------------------------------------------ export (CSV)
-    @FXML
-    private void export() {
-        if (current == null) return;
-        FileChooser fc = new FileChooser();
-        fc.setInitialFileName(current.title().toLowerCase().replace(' ', '-') + ".csv");
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV file", "*.csv"));
-        File f = fc.showSaveDialog(reportTable.getScene().getWindow());
-        if (f == null) return;
-        try (PrintWriter w = new PrintWriter(f, StandardCharsets.UTF_8)) {
-            w.print('\uFEFF');                                   // so Excel reads UTF-8 correctly
-            w.println(csvLine(List.of(current.headers())));
-            for (RowData r : filtered) w.println(csvLine(r.cells()));
-        } catch (Exception ex) {
-            reportTable.setPlaceholder(new Label("⚠ Export failed – " + ex.getMessage()));
+                units += qty;
+                value += qty * price;
+                if (qty <= 0) outCount++;
+                toReorder += Math.max(reorder - qty, 0);
+                rows.add(Arrays.asList(nz(rs.getString("product_name")), nz(rs.getString("cat")), count(qty),
+                        count(reorder), status, money(qty * price)));
+            }
         }
-    }
-
-
-    private static String csvLine(List<String> cells) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cells.size(); i++) {
-            if (i > 0) sb.append(',');
-            sb.append('"').append(cells.get(i) == null ? "" : cells.get(i).replace("\"", "\"\"")).append('"');
+        List<String> headers = List.of("Product", "Category", "In stock", "Reorder level", "Status", "Stock value (LKR)");
+        List<Boolean> numeric = List.of(false, false, true, true, false, true);
+        if (lowOnly) {
+            return new Result(headers, numeric, rows,
+                    new String[]{"Items below reorder level", "Out of stock", "Units to reorder"},
+                    new String[]{count(rows.size()), count(outCount), count(toReorder)});
         }
-        return sb.toString();
+        return new Result(headers, numeric, rows,
+                new String[]{"Products", "Units in stock", "Stock value"},
+                new String[]{count(rows.size()), count(units), "LKR " + money(value)});
     }
+
+    // ---------------- showing the result ----------------
+
+    private void show(Result r, String type, boolean needsDates, LocalDate from, LocalDate to) {
+        lastResult = r;
+        lastTitle = type;
+
+        tblReport.getColumns().clear();
+        for (int i = 0; i < r.headers().size(); i++) {
+            final int idx = i;
+            TableColumn<ObservableList<String>, String> col = new TableColumn<>(r.headers().get(i));
+            col.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().get(idx)));
+            col.setSortable(false);
+            if (r.numeric().get(i)) {
+                col.getStyleClass().add("num");
+                col.setStyle("-fx-alignment: CENTER-RIGHT;");
+            }
+            tblReport.getColumns().add(col);
+        }
+        ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+        for (List<String> row : r.rows()) data.add(FXCollections.observableArrayList(row));
+        tblReport.setItems(data);
+
+        lblTitle.setText(type);
+        lblSub.setText(needsDates ? from.format(DAY) + "  –  " + to.format(DAY)
+                : "As of " + LocalDate.now().format(DAY));
+
+        lblCap1.setText(r.statCaptions()[0]);  lblVal1.setText(r.statValues()[0]);
+        lblCap2.setText(r.statCaptions()[1]);  lblVal2.setText(r.statValues()[1]);
+        lblCap3.setText(r.statCaptions()[2]);  lblVal3.setText(r.statValues()[2]);
+
+        btnExport.setDisable(r.rows().isEmpty());
+        setStatus(r.rows().size() + (r.rows().size() == 1 ? " row" : " rows") + "  ·  generated "
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), false);
+    }
+
+    private void setBusy(boolean busy) {
+        btnGenerate.setDisable(busy);
+        if (busy) setStatus("Loading…", false);
+    }
+
+    private void setStatus(String msg, boolean error) {
+        lblStatus.setText(msg);
+        lblStatus.setStyle("-fx-text-fill: " + (error ? ERR_COLOR : MUTED) + ";");
+    }
+
+    private static String nz(String s)    { return s == null ? "" : s; }
+    private static String money(double v) { return String.format(Locale.US, "%,.2f", v); }
+    private static String count(long v)   { return String.format(Locale.US, "%,d", v); }
 }
-

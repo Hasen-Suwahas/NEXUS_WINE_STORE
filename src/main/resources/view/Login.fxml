@@ -110,15 +110,17 @@
             <VBox.margin><Insets top="22" /></VBox.margin>
          </Button>
 
-         <!-- Sign Up Button -->
-         <Button fx:id="btnSignUp" maxWidth="430" onAction="#onSignUp" styleClass="login-btn" text="SIGN UP">
-            <VBox.margin><Insets top="12" /></VBox.margin>
-         </Button>
-
+         <!-- Create Account link (opens Sign Up page) -->
          <HBox alignment="CENTER" spacing="8">
-            <VBox.margin><Insets top="16" /></VBox.margin>
+            <VBox.margin><Insets top="18" /></VBox.margin>
             <Label styleClass="small-text" text="Don’t have an account?" />
-            <Hyperlink onAction="#onContactAdmin" styleClass="contact-link" text="Contact Admin" />
+            <Hyperlink fx:id="linkCreateAccount" onAction="#onSignUp" styleClass="contact-link" text="Create Account" />
+         </HBox>
+
+         <!-- Forgot Password link -->
+         <HBox alignment="CENTER">
+            <VBox.margin><Insets top="6" /></VBox.margin>
+            <Hyperlink fx:id="linkForgotPassword" onAction="#onForgotPassword" styleClass="contact-link" text="Forgot Password?" />
          </HBox>
 
          <Region VBox.vgrow="ALWAYS" />
@@ -140,7 +142,6 @@
       <Button focusTraversable="false" onAction="#onMinimize" styleClass="win-btn" text="—" />
       <Button focusTraversable="false" onAction="#onClose" styleClass="win-btn" text="✕" />
    </HBox>
-
    <!-- gold frame on top of everything -->
    <Region mouseTransparent="true" styleClass="frame" />
 </StackPane>

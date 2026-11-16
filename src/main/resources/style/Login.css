@@ -33,7 +33,7 @@
 }
 .input-box.focused { -fx-border-color: #f3d77e; -fx-effect: dropshadow(gaussian, rgba(217,172,76,0.35), 12, 0.1, 0, 0); }
 .input-icon { -fx-text-fill: #e3b455; -fx-font-size: 18px; }
-.input-field, .input-field:focused {
+.input-field, .input-field:focus {
     -fx-background-color: transparent; -fx-background-insets: 0; -fx-text-fill: #f4ead0; -fx-prompt-text-fill: #8f8669;
     -fx-font-size: 15px; -fx-highlight-fill: #b8862f; -fx-highlight-text-fill: black;
 }
@@ -49,7 +49,7 @@
     -fx-background-radius: 8; -fx-pref-height: 54; -fx-cursor: hand;
 }
 .login-btn:hover { -fx-background-color: linear-gradient(to bottom, #f7d880, #dba844); }
-.login-btn:pressed { -fx-background-color: #b8862f; }
+.login-btn:corner-present { -fx-background-color: #b8862f; }
 .login-btn:disabled { -fx-opacity: 0.65; }
 
 .small-text { -fx-text-fill: white; -fx-font-size: 13px; }

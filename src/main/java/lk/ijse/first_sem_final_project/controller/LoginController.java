@@ -43,7 +43,7 @@ public class LoginController {
     @FXML private HBox userBox, passBox;
     @FXML private TextField txtUsername, txtPasswordVisible;
     @FXML private PasswordField txtPassword;
-    @FXML private Button btnLogin, btnSignUp, btnEye;
+    @FXML private Button btnLogin, btnEye;
     @FXML private Label lblError;
 
     private double dragX, dragY;
@@ -176,11 +176,11 @@ public class LoginController {
         }
     }
 
-    // ===================== SIGN UP ACTION =====================
+    // ===================== CREATE ACCOUNT (SIGN UP) LINK =====================
     @FXML
     private void onSignUp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(SIGNUP_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUp.fxml"));
             Parent signup = loader.load();
 
             Stage stage = new Stage();
@@ -196,6 +196,16 @@ public class LoginController {
         }
     }
 
+    // ===================== FORGOT PASSWORD LINK =====================
+    @FXML
+    private void onForgotPassword() {
+        Alert a = new Alert(Alert.AlertType.INFORMATION,
+                "Please contact your system administrator to reset your password.");
+        a.setHeaderText("Forgot Password");
+        a.show();
+        // TODO: later you can replace this with a real "Reset Password" window
+    }
+
     // UI HELPERS
     @FXML
     private void togglePassword() {
@@ -207,13 +217,6 @@ public class LoginController {
         btnEye.setText(show ? "🙈" : "👁");
         (show ? txtPasswordVisible : txtPassword).requestFocus();
         (show ? txtPasswordVisible : txtPassword).end();
-    }
-
-    @FXML
-    private void onContactAdmin() {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, "Please contact your system administrator to create an account.");
-        a.setHeaderText("Contact Admin");
-        a.show();
     }
 
     private void showError(String msg) {
