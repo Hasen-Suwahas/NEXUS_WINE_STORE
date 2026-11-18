@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Categories page.  table: categories(category_id, category_name, description) */
 public class CategoryController extends BasePageController<CategoryController.CategoryRow> {
 
     public record CategoryRow(int id, String name, String description, int products) {}

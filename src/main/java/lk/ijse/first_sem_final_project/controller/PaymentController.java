@@ -12,15 +12,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- - Payments page.
- - tables: payments(payment_id, sale_id, payment_status, payment_method, payment_date, amount_paid), sales, customers
- */
+
 public class PaymentController extends BasePageController<PaymentController.PaymentRow> {
 
     public record PaymentRow(int id, int saleId, String customer, String method, String date, double amount, String status) {}
-
-    /** a sale that still has a balance to pay */
     private record SaleOpt(int id, String label, double balance) {
         @Override public String toString() { return label; }
     }
@@ -76,7 +71,7 @@ public class PaymentController extends BasePageController<PaymentController.Paym
                 || r.status().toLowerCase().contains(q) || r.date().contains(q);
     }
 
-    // ===================================================================== ADD PAYMENT
+    //  ADD PAYMENT
     @Override
     protected void onAdd() {
         List<SaleOpt> open = new ArrayList<>();
@@ -131,7 +126,7 @@ public class PaymentController extends BasePageController<PaymentController.Paym
         refresh();
     }
 
-    // ===================================================================== EDIT (method + status only)
+    //  (method + status only)
     private void openEdit(PaymentRow r) {
         Label info = new Label(code("SL", r.saleId()) + "  –  LKR " + money(r.amount()));
         info.getStyleClass().add("dlg-text");
@@ -155,7 +150,7 @@ public class PaymentController extends BasePageController<PaymentController.Paym
         refresh();
     }
 
-    // ===================================================================== DELETE
+    // DELETE
     private void delete(PaymentRow r) {
         if (!confirm("Delete Payment", "Delete payment " + code("PY", r.id()) + " (LKR " + money(r.amount()) + ")?")) return;
         try (Connection c = conn()) {

@@ -19,9 +19,9 @@ import java.util.Deque;
 
 public class ScanController {
 
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC";
+    private static final String DB_URL  = "jdbc:mysql://localhost:3306/nexus_wine_store";
     private static final String DB_USER = "root";
-    private static final String DB_PASS = "";
+    private static final String DB_PASS = "ijse@1234";
 
     private static final String OK_COLOR  = "#e0a93b";
     private static final String ERR_COLOR = "#e5604d";
@@ -43,7 +43,6 @@ public class ScanController {
         Platform.runLater(txtScan::requestFocus);
     }
 
-    /** Fired when the scanner sends ENTER (or you type a code and press ENTER). */
     @FXML
     private void onScan(ActionEvent e) {
         String code = txtScan.getText() == null ? "" : txtScan.getText().trim();
@@ -83,8 +82,7 @@ public class ScanController {
         txtScan.requestFocus();
     }
 
-    // ---------------- database ----------------
-
+    // database
     private Connection getConnection() throws SQLException {
         // If you already have a DBConnection class use: return DBConnection.getInstance().getConnection();
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
@@ -107,8 +105,6 @@ public class ScanController {
             }
         }
     }
-
-    // ---------------- ui ----------------
 
     private void showBottle(Bottle b) {
         lblName.setText(b.name());

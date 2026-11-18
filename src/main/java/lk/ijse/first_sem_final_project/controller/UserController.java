@@ -14,18 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Users page.  table: users(user_id, full_name, username, password_hash, role, phone, status) */
 public class UserController extends BasePageController<UserController.UserRow> {
 
     public record UserRow(int id, String fullName, String username, String role, String phone, String status) {}
-
     private static final List<String> ROLES = List.of("Admin", "Manager", "Cashier");
     private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_.]{4,20}$");
 
     private static String statusLabel(String s) {
         return s != null && (s.equalsIgnoreCase("ACTIVE") || s.equals("1")) ? "Active" : "Inactive";
     }
-
     @Override protected String pageKey() { return "User"; }
 
     @Override
@@ -51,7 +48,6 @@ public class UserController extends BasePageController<UserController.UserRow> {
         }
         return list;
     }
-
     @Override
     protected boolean matches(UserRow r, String q) {
         return code("U", r.id()).toLowerCase().contains(q) || text(r.fullName()).toLowerCase().contains(q)
@@ -59,7 +55,7 @@ public class UserController extends BasePageController<UserController.UserRow> {
                 || r.phone().toLowerCase().contains(q);
     }
 
-    // ---------------------------------------------------------------- add / edit / delete
+    // add / edit / delete
     @Override protected void onAdd() { openForm(null); }
     private void openEdit(UserRow r) { openForm(r); }
 
@@ -129,7 +125,7 @@ public class UserController extends BasePageController<UserController.UserRow> {
         refresh();
     }
 
-    // ---------------------------------------------------------------- export
+    // export
     @Override protected String exportName() { return "users"; }
     @Override protected String[] csvHeader() { return new String[]{"ID", "Full Name", "Username", "Role", "Phone", "Status"}; }
     @Override protected String[] csvRow(UserRow r) {

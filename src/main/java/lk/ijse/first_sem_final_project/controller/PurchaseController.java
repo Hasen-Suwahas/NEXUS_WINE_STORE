@@ -30,10 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Purchases page.  tables: purchases, purchase_items, stock, suppliers, users, products
- * Uses only the methods that ProductController already uses from BasePageController.
- */
 public class PurchaseController extends BasePageController<PurchaseController.PurchaseRow> {
 
     public record PurchaseRow(int id, String supplier, String receivedBy, String date, int units, double total) {}
@@ -50,7 +46,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
 
     @Override protected String pageKey() { return "Purchase"; }
 
-    // ================================================================= columns
+    //  columns
     @Override
     protected void setupColumns() {
         textCol("ID", 70, r -> code("PU", r.id()));
@@ -97,7 +93,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         table.getColumns().add(c);
     }
 
-    // ================================================================= data
+    //  data
     @Override
     protected List<PurchaseRow> fetchRows(Connection c) throws SQLException {
         String sql = "SELECT pu.purchase_id, COALESCE(su.supplier_name,'-') AS supplier, COALESCE(u.full_name,'-') AS received_by, "
@@ -123,7 +119,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
                 || r.receivedBy().toLowerCase().contains(q) || r.date().contains(q);
     }
 
-    // ================================================================= NEW PURCHASE
+    //NEW PURCHASE
     @Override
     protected void onAdd() {
         List<Item> suppliers = loadItems("SELECT supplier_id, supplier_name FROM suppliers ORDER BY supplier_name");
@@ -206,7 +202,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         refresh();
     }
 
-    // ================================================================= VIEW ITEMS
+    //VIEW ITEMS
     private void showDetails(PurchaseRow r) {
         List<Detail> items = new ArrayList<>();
         String sql = "SELECT p.product_name, pi.quantity, pi.unit_cost, pi.subtotal FROM purchase_items pi "
@@ -242,7 +238,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         showForm("Purchase " + code("PU", r.id()), box, () -> null, "Close", false);
     }
 
-    // ================================================================= DELETE
+    //  DELETE
     private void delete(PurchaseRow r) {
         if (!confirm("Delete Purchase", "Delete purchase " + code("PU", r.id()) + "?\nThe purchased units are removed from stock.")) return;
         try (Connection c = conn()) {
@@ -258,14 +254,14 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         refresh();
     }
 
-    // ================================================================= export
+    // export
     @Override protected String exportName() { return "purchases"; }
     @Override protected String[] csvHeader() { return new String[]{"ID", "Supplier", "Received By", "Date", "Units", "Total"}; }
     @Override protected String[] csvRow(PurchaseRow r) {
         return new String[]{code("PU", r.id()), r.supplier(), r.receivedBy(), r.date(), String.valueOf(r.units()), plain(r.total())};
     }
 
-    // ================================================================= private helpers (self-contained)
+    // private helpers (self-contained)
     private static Button iconButton(String text, String styleClass) {
         Button b = new Button(text);
         b.getStyleClass().addAll("pg-icon-btn", styleClass);
@@ -293,7 +289,6 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         return sum;
     }
 
-    /** returns an error text, or null when the product was added / merged into the cart */
     private String addToCart(ObservableList<Line> cart, Prod p, String qtyText, double unitCost) {
         if (p == null) return "Select a product first.";
         Integer q = whole(qtyText);
@@ -358,7 +353,6 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
         return list;
     }
 
-    /** the logged-in user's id (looked up by name), or the first user as a fallback */
     private int findUserId(Connection c) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement("SELECT user_id FROM users WHERE full_name = ? LIMIT 1")) {
             ps.setString(1, Session.getName());

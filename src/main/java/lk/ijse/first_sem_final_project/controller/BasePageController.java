@@ -40,18 +40,16 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * Shared behaviour of every "Manage ..." page:
- * live table, search, pagination, CSV export, date/time, and styled add/edit/delete dialogs.
- * A page controller only supplies columns, the SELECT query and its add/edit/delete code.
- */
+
+//  Shared behaviour of every Manage page:
+
 public abstract class BasePageController<T> {
 
     private static final String CSS = "/style/pages.css";
     private static final int ROW_HEIGHT = 46;
     private static final int REFRESH_SECONDS = 15;
 
-    // ---- injected from the FXML ----
+    //  injected from the FXML
     @FXML protected TableView<T> table;
     @FXML protected TextField txtSearch;
     @FXML protected Label lblDate, lblTime, lblCount;
@@ -63,7 +61,6 @@ public abstract class BasePageController<T> {
     private int pageSize = 6;
     private Timeline clock, autoRefresh;
 
-    /** small id + name pair for combo boxes */
     protected record Item(int id, String name) {
         @Override public String toString() { return name; }
     }

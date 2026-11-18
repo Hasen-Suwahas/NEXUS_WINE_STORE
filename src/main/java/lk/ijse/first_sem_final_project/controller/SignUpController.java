@@ -26,11 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Pattern;
 
-/*
- *   users(user_id, full_name, username, password_hash, role, phone, status)
- * Password is saved as SHA-256 hex (LoginController already accepts this).
- * All JDBC code is inside this class
- */
+
 public class SignUpController {
 
     private static final String DB_URL  = "jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC";
@@ -41,7 +37,7 @@ public class SignUpController {
     private static final String FIRST_USER_ROLE = "Admin";  // the very first account becomes Admin
 
     private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_.]{4,20}$");
-    private static final Pattern PHONE = Pattern.compile("^\\+?\\d{9,12}$");
+    private static final Pattern PHONE = Pattern.compile("^\\+?\\d{9,10}$");
 
     @FXML private StackPane root;
     @FXML private HBox nameBox, userBox, phoneBox, passBox, confirmBox;
@@ -173,7 +169,7 @@ public class SignUpController {
     @FXML
     private void onBackToLogin() {
         try {
-            Parent login = FXMLLoader.load(getClass().getResource(LOGIN_FXML));
+            Parent login = FXMLLoader.load(getClass().getResource("/view/Login.fxml"));
             root.getScene().setRoot(login);          // same (transparent, undecorated) window
         } catch (Exception ex) {
             ex.printStackTrace();

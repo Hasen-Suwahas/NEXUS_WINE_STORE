@@ -43,7 +43,6 @@
             <ToggleButton toggleGroup="$navGroup" text="Suppliers" userData="Supplier" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="Payments" userData="Payment" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
             <ToggleButton toggleGroup="$navGroup" text="Reports" userData="Report" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
-            <ToggleButton toggleGroup="$navGroup" text="Users" userData="User" onAction="#navigate" styleClass="nav-btn" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
@@ -54,6 +53,12 @@
                   <Label fx:id="lblUserRole" text="Admin" styleClass="user-role"/>
                </VBox>
             </HBox>
+
+            <!-- Logout -->
+            <Button fx:id="btnLogout" text="Logout" onAction="#onLogout"
+                    styleClass="logout-btn" maxWidth="Infinity" focusTraversable="false">
+               <VBox.margin><Insets top="8"/></VBox.margin>
+            </Button>
          </VBox>
 
          <!-- ================= CONTENT ================= -->

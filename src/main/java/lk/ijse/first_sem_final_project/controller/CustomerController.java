@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Customers page.  table: customers(customer_id, customer_name, phone, email, address) */
 public class CustomerController extends BasePageController<CustomerController.CustomerRow> {
 
     public record CustomerRow(int id, String name, String phone, String email, String address) {}

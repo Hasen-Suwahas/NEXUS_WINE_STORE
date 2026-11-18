@@ -9,7 +9,6 @@ import javafx.scene.control.ToggleGroup;
 import lk.ijse.first_sem_final_project.util.Navigator;
 import lk.ijse.first_sem_final_project.util.Session;
 
-/** Controller of Sidebar.fxml – shared by the dashboard and every Manage page. */
 public class SidebarController {
 
     @FXML private ToggleGroup navGroup;
@@ -20,7 +19,6 @@ public class SidebarController {
     @FXML
     public void initialize() { refreshUser(); }
 
-    /** shows the logged-in user (name + role) at the bottom of the sidebar */
     public void refreshUser() {
         String name = Session.getName();
         lblUserName.setText(name);
@@ -28,7 +26,6 @@ public class SidebarController {
         lblAvatar.setText(name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase());
     }
 
-    /** highlights the button of the page that is open (called by each page controller) */
     public void setActive(String page) {
         active = page;
         for (Toggle t : navGroup.getToggles())

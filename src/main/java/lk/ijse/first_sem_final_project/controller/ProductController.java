@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Products page.  tables: products, categories, stock */
 public class ProductController extends BasePageController<ProductController.ProductRow> {
 
     public record ProductRow(int id, String name, int categoryId, String category, String description,
@@ -57,7 +56,7 @@ public class ProductController extends BasePageController<ProductController.Prod
                 || r.category().toLowerCase().contains(q) || stockStatus(r.stock(), r.reorder()).toLowerCase().contains(q);
     }
 
-    // ---------------------------------------------------------------- add / edit / delete
+    // add / edit / delete
     @Override protected void onAdd() { openForm(null); }
     private void openEdit(ProductRow r) { openForm(r); }
 
@@ -141,7 +140,7 @@ public class ProductController extends BasePageController<ProductController.Prod
         refresh();
     }
 
-    // ---------------------------------------------------------------- export
+    //  export
     @Override protected String exportName() { return "products"; }
     @Override protected String[] csvHeader() { return new String[]{"ID", "Name", "Category", "Cost", "Price", "Stock", "Reorder Level", "Status"}; }
     @Override protected String[] csvRow(ProductRow r) {

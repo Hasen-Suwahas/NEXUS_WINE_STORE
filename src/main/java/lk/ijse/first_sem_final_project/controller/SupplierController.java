@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Suppliers page.  table: suppliers(supplier_id, supplier_name, contact_person, phone, email, address) */
 public class SupplierController extends BasePageController<SupplierController.SupplierRow> {
 
     public record SupplierRow(int id, String name, String contact, String phone, String email, String address) {}

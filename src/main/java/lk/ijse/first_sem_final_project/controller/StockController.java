@@ -13,7 +13,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Stock page.  tables: stock, products, categories */
 public class StockController extends BasePageController<StockController.StockRow> {
 
     public record StockRow(int stockId, int productId, String product, String category,
@@ -87,7 +86,7 @@ public class StockController extends BasePageController<StockController.StockRow
         refresh();
     }
 
-    // ---------------------------------------------------------------- set exact quantity
+    // set exact quantity
     private void openEdit(StockRow r) {
         Label name = new Label(r.product());
         name.getStyleClass().add("dlg-text");
@@ -107,7 +106,7 @@ public class StockController extends BasePageController<StockController.StockRow
         refresh();
     }
 
-    // ---------------------------------------------------------------- export
+    //  export
     @Override protected String exportName() { return "stock"; }
     @Override protected String[] csvHeader() { return new String[]{"ID", "Product", "Category", "Quantity", "Reorder Level", "Last Updated", "Status"}; }
     @Override protected String[] csvRow(StockRow r) {

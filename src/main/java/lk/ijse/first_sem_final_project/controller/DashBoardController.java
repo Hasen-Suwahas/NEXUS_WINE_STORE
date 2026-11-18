@@ -13,10 +13,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Toggle;
@@ -29,12 +34,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,11 +58,9 @@ import java.util.Map;
 
 public class DashBoardController {
 
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "";
     private static final String STORE_NAME = "Nexus Wine Store";
     private static final String PAGE_FOLDER = "/view/";          // where your Page.fxml files are (resources/view)
+    private static final String LOGIN_FXML  = "/view/LoginPage.fxml";   // <- change if your login fxml has a different name
 
     private static final int REFRESH_SECONDS = 10;
     private static final String RANGE_7 = "Last 7 Days";
@@ -64,6 +68,14 @@ public class DashBoardController {
     private static final String RANGE_YEAR = "This Year";
     private static final String[] COLORS = {"#e0a93b", "#b87333", "#f0cf7a", "#8a8a8a", "#555555"};
     private static final String NOT_CANCELLED = " UPPER(COALESCE(order_status,'')) <> 'CANCELLED' ";
+
+    // logout button look (set from code so it always applies, even if the css is not reloaded)
+    private static final String LOGOUT_BASE = "-fx-background-color: transparent; -fx-border-color: #b87333; "
+            + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; "
+            + "-fx-text-fill: #e0a93b; -fx-font-weight: bold; -fx-padding: 9 0 9 0; -fx-cursor: hand;";
+    private static final String LOGOUT_HOVER = "-fx-background-color: #b87333; -fx-border-color: #b87333; "
+            + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; "
+            + "-fx-text-fill: #1a1a1a; -fx-font-weight: bold; -fx-padding: 9 0 9 0; -fx-cursor: hand;";
 
     // small holders for one refresh of data
     private record CategoryShare(String name, long units) {}
@@ -83,6 +95,7 @@ public class DashBoardController {
     @FXML private PieChart pieChart;
     @FXML private Label lblDonutTotal;
     @FXML private VBox legendBox;
+    @FXML private Button btnLogout;
 
     private ScheduledService<Snapshot> liveService;
     private Timeline clock;
@@ -94,6 +107,7 @@ public class DashBoardController {
         lblStoreName.setText(STORE_NAME);
         lblBadge.setText(STORE_NAME);
         setCurrentUser("Admin", "Admin");
+        styleLogoutButton();
 
         setupChart();
         rangeCombo.getItems().addAll(RANGE_7, RANGE_30, RANGE_YEAR);
@@ -105,6 +119,12 @@ public class DashBoardController {
         startClock();
         startLiveUpdates();
     }
+    private void styleLogoutButton() {
+        btnLogout.setStyle(LOGOUT_BASE);
+        btnLogout.setOnMouseEntered(e -> btnLogout.setStyle(LOGOUT_HOVER));
+        btnLogout.setOnMouseExited(e -> btnLogout.setStyle(LOGOUT_BASE));
+    }
+
     public void setCurrentUser(String fullName, String role) {
         userName = (fullName == null || fullName.isBlank()) ? "Admin" : fullName;
         lblUserName.setText(userName);
@@ -159,10 +179,8 @@ public class DashBoardController {
     }
 
     // DATABASE (plain JDBC)
-    // If you already have a DBConnection class, replace the body with:
-    //   return DBConnection.getInstance().getConnection();
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        return lk.ijse.first_sem_final_project.db.DBConnection.getInstance().getConnection();
     }
 
     private Snapshot loadSnapshot(String range) throws SQLException {
@@ -362,5 +380,34 @@ public class DashBoardController {
         Label l = new Label(page + " page – coming soon");
         l.getStyleClass().add("h1");
         return new StackPane(l);
+    }
+
+    // LOGOUT
+    @FXML
+    private void onLogout() {
+        Stage current = (Stage) contentHost.getScene().getWindow();
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Are you sure you want to log out?", ButtonType.YES, ButtonType.NO);
+        confirm.setHeaderText("Logout");
+        confirm.initOwner(current);
+        if (confirm.showAndWait().orElse(ButtonType.NO) != ButtonType.YES) return;
+
+        try {
+            Parent login = FXMLLoader.load(getClass().getResource("/view/Login.fxml"));
+
+            Stage stage = new Stage();
+            stage.initStyle(StageStyle.UNDECORATED);   // login page has its own window buttons
+            stage.setTitle("Nexus Wine Store - Login");
+            stage.setScene(new Scene(login, 1000, 640));
+            stage.show();
+            stage.centerOnScreen();
+
+            shutdown();        // stop live refresh + clock
+            current.close();   // close the dashboard
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Could not open the login page: " + ex.getMessage()).show();
+        }
     }
 }

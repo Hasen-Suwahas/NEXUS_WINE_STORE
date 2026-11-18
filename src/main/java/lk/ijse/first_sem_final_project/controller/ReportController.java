@@ -35,16 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Reports page: pick a report, pick a period, press Generate, export to CSV.
- *
- * Tables / columns used (edit the SQL in the report methods if yours differ):
- *   sales(sale_id, sale_date, order_status, total_amount)
- *   sale_items(sale_id, product_id, quantity, unit_price)
- *   products(product_id, product_name, unit_price, category_id, reorder_level)
- *   categories(category_id, category_name)
- *   stock(product_id, quantity)
- */
 public class ReportController {
 
     private static final String SALES = "Sales report";

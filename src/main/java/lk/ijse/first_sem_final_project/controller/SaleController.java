@@ -31,10 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Sales page.  tables: sales, sale_items, payments, stock, customers, users, products
- * Uses only the methods that ProductController already uses from BasePageController.
- */
 public class SaleController extends BasePageController<SaleController.SaleRow> {
 
     public record SaleRow(int id, String customer, String cashier, String date, double total, double paid, String status) {}
@@ -51,7 +47,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
 
     @Override protected String pageKey() { return "Sale"; }
 
-    // ================================================================= columns
+    // columns
     @Override
     protected void setupColumns() {
         textCol("ID", 70, r -> code("SL", r.id()));
@@ -99,7 +95,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         table.getColumns().add(c);
     }
 
-    // ================================================================= data
+    //data
     @Override
     protected List<SaleRow> fetchRows(Connection c) throws SQLException {
         String sql = "SELECT s.sale_id, COALESCE(cu.customer_name,'Walk-in') AS customer, COALESCE(u.full_name,'-') AS cashier, "
@@ -126,7 +122,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
                 || r.cashier().toLowerCase().contains(q) || r.date().contains(q) || r.status().toLowerCase().contains(q);
     }
 
-    // ================================================================= NEW SALE
+    //  NEW SALE
     @Override
     protected void onAdd() {
         List<Item> customers = new ArrayList<>();
@@ -227,7 +223,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         refresh();
     }
 
-    // ================================================================= VIEW ITEMS
+    //  VIEW ITEMS
     private void showDetails(SaleRow r) {
         List<Detail> items = new ArrayList<>();
         String sql = "SELECT p.product_name, si.quantity, si.unit_price, si.subtotal FROM sale_items si "
@@ -264,7 +260,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         showForm("Sale " + code("SL", r.id()), box, () -> null, "Close", false);
     }
 
-    // ================================================================= DELETE
+    // DELETE
     private void delete(SaleRow r) {
         if (!confirm("Delete Sale", "Delete sale " + code("SL", r.id()) + "?\nThe sold items go back into stock.")) return;
         try (Connection c = conn()) {
@@ -281,14 +277,14 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         refresh();
     }
 
-    // ================================================================= export
+    // export
     @Override protected String exportName() { return "sales"; }
     @Override protected String[] csvHeader() { return new String[]{"ID", "Customer", "Cashier", "Date", "Total", "Paid", "Status"}; }
     @Override protected String[] csvRow(SaleRow r) {
         return new String[]{code("SL", r.id()), r.customer(), r.cashier(), r.date(), plain(r.total()), plain(r.paid()), titleCase(r.status())};
     }
 
-    // ================================================================= private helpers (self-contained)
+    // private helpers (self-contained)
     private static Button iconButton(String text, String styleClass) {
         Button b = new Button(text);
         b.getStyleClass().addAll("pg-icon-btn", styleClass);
@@ -321,7 +317,6 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         return sum;
     }
 
-    /** returns an error text, or null when the product was added / merged into the cart */
     private String addToCart(ObservableList<Line> cart, Prod p, String qtyText, double price, boolean checkStock) {
         if (p == null) return "Select a product first.";
         Integer q = whole(qtyText);
@@ -387,7 +382,6 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         return list;
     }
 
-    /** the logged-in user's id (looked up by name), or the first user as a fallback */
     private int findUserId(Connection c) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement("SELECT user_id FROM users WHERE full_name = ? LIMIT 1")) {
             ps.setString(1, Session.getName());
