@@ -15,23 +15,20 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lk.ijse.first_sem_final_project.db.DBConnection; // Import your DBConnection class
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Pattern;
 
-
 public class SignUpController {
 
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "";
+    // Removed hardcoded DB_URL, DB_USER, and DB_PASS constants. We use DBConnection instead.
     private static final String LOGIN_FXML = "/view/Login.fxml";
     private static final String DEFAULT_ROLE = "Cashier";   // role given to every new account
     private static final String FIRST_USER_ROLE = "Admin";  // the very first account becomes Admin
@@ -125,7 +122,8 @@ public class SignUpController {
 
     /** returns null when the account was created, otherwise an error message */
     private String register(String fullName, String username, String phone, String password) throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+        // Use DBConnection instead of DriverManager.getConnection(...) with hardcoded variables
+        try (Connection c = DBConnection.getInstance().getConnection()) {
 
             // 1) username must be unique
             try (PreparedStatement ps = c.prepareStatement("SELECT 1 FROM users WHERE username = ?")) {

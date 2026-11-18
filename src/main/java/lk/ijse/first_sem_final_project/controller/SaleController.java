@@ -95,7 +95,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
         table.getColumns().add(c);
     }
 
-    //data
+    // data
     @Override
     protected List<SaleRow> fetchRows(Connection c) throws SQLException {
         String sql = "SELECT s.sale_id, COALESCE(cu.customer_name,'Walk-in') AS customer, COALESCE(u.full_name,'-') AS cashier, "
@@ -122,7 +122,7 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
                 || r.cashier().toLowerCase().contains(q) || r.date().contains(q) || r.status().toLowerCase().contains(q);
     }
 
-    //  NEW SALE
+    // NEW SALE
     @Override
     protected void onAdd() {
         List<Item> customers = new ArrayList<>();
@@ -167,30 +167,98 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
             if (err == null) qty.setText("1");
         });
 
-        GridPane g = grid();
-        g.setPrefWidth(640);
-        row(g, 0, "Customer", customer);
-        g.add(pick, 0, 1, 2, 1);
-        g.add(cartTable, 0, 2, 2, 1);
-        g.add(cartMsg, 0, 3, 2, 1);
-        g.add(total, 0, 4, 2, 1);
-        row(g, 5, "Payment", method);
-        row(g, 6, "Amount Paid", paid);
+        VBox box = new VBox(12, customer, pick, cartMsg, cartTable, total, method, paid);
+        box.setPrefWidth(520);
 
-        boolean ok = showForm("New Sale", g, () -> {
-            if (cart.isEmpty()) return "Add at least one product to the sale.";
-            double sum = cartTotal(cart);
-            Double p = num(paid.getText());
-            if (p == null) return "Amount paid must be a valid number.";
-            if (p > sum + 0.001) return "Amount paid cannot be more than the total.";
+        boolean ok = showForm("New Sale", box, () -> {
+            if (cart.isEmpty()) return "Cart is empty.";
+            Double pVal = num(paid.getText());
+            if (pVal == null) return "Enter a valid paid amount.";
+            if (pVal < cartTotal(cart)) return "Paid amount is less than total.";
             return null;
-        }, "Complete Sale", true);
+        }, "Checkout", true);
+
         if (!ok) return;
 
-        double totalV = cartTotal(cart);
-        double paidV = num(paid.getText());
-        boolean fullyPaid = paidV + 0.001 >= totalV;
+        saveSale(customer.getValue().id(), method.getValue(), num(paid.getText()), cart);
+    }
 
+    private List<Prod> loadProds() {
+        List<Prod> list = new ArrayList<>();
+        String sql = "SELECT p.product_id, p.product_name, p.selling_price, COALESCE(s.stock_qty, 0) AS stock "
+                + "FROM products p "
+                + "LEFT JOIN (SELECT product_id, SUM(quantity) AS stock_qty FROM stock GROUP BY product_id) s ON s.product_id = p.product_id "
+                + "ORDER BY p.product_name";
+        try (Connection c = conn(); Statement st = c.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new Prod(rs.getInt("product_id"), rs.getString("product_name"), rs.getDouble("selling_price"), rs.getInt("stock")));
+            }
+        } catch (SQLException e) { dbError(e); }
+        return list;
+    }
+
+    private TableView<Line> buildCartTable(ObservableList<Line> cart, String priceHeader) {
+        TableView<Line> tv = new TableView<>(cart);
+        tv.setPrefHeight(180);
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Line, String> cName = new TableColumn<>("Product");
+        cName.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+
+        TableColumn<Line, String> cQty = new TableColumn<>("Qty");
+        cQty.setPrefWidth(60);
+        cQty.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().qty())));
+
+        TableColumn<Line, String> cPrice = new TableColumn<>(priceHeader);
+        cPrice.setPrefWidth(90);
+        cPrice.setCellValueFactory(d -> new SimpleStringProperty(money(d.getValue().price())));
+
+        TableColumn<Line, String> cSub = new TableColumn<>("Subtotal");
+        cSub.setPrefWidth(90);
+        cSub.setCellValueFactory(d -> new SimpleStringProperty(money(d.getValue().subtotal())));
+
+        TableColumn<Line, Void> cAct = new TableColumn<>("");
+        cAct.setPrefWidth(50);
+        cAct.setCellFactory(tc -> new TableCell<>() {
+            private final Button del = iconButton("✕", "pg-icon-delete");
+            { del.setOnAction(e -> cart.remove(getTableRow().getItem())); }
+            @Override protected void updateItem(Void v, boolean empty) {
+                super.updateItem(v, empty);
+                setGraphic(empty ? null : del);
+            }
+        });
+
+        tv.getColumns().addAll(cName, cQty, cPrice, cSub, cAct);
+        return tv;
+    }
+
+    private String addToCart(ObservableList<Line> cart, Prod p, String qtyStr, double price, boolean checkStock) {
+        if (p == null) return "Please select a product.";
+        Integer q = whole(qtyStr);
+        if (q == null || q <= 0) return "Quantity must be a positive whole number.";
+        if (checkStock && q > p.stock()) return "Not enough stock available (" + p.stock() + " in stock).";
+
+        for (int i = 0; i < cart.size(); i++) {
+            Line l = cart.get(i);
+            if (l.productId() == p.id()) {
+                int newQty = l.qty() + q;
+                if (checkStock && newQty > p.stock()) return "Total quantity exceeds stock (" + p.stock() + ").";
+                cart.set(i, new Line(p.id(), p.name(), newQty, price));
+                return null;
+            }
+        }
+        cart.add(new Line(p.id(), p.name(), q, price));
+        return null;
+    }
+
+    private double cartTotal(ObservableList<Line> cart) {
+        double sum = 0;
+        for (Line l : cart) sum += l.subtotal();
+        return sum;
+    }
+
+    private void saveSale(int customerId, String method, double paidAmount, ObservableList<Line> cart) {
+        double total = cartTotal(cart);
         try (Connection c = conn()) {
             c.setAutoCommit(false);
             try {
@@ -198,197 +266,141 @@ public class SaleController extends BasePageController<SaleController.SaleRow> {
                 try (PreparedStatement ps = c.prepareStatement(
                         "INSERT INTO sales (customer_id, user_id, sale_date, total_amount, order_status) VALUES (?,?,NOW(),?,?)",
                         Statement.RETURN_GENERATED_KEYS)) {
-                    if (customer.getValue().id() == 0) ps.setNull(1, Types.INTEGER);
-                    else ps.setInt(1, customer.getValue().id());
-                    ps.setInt(2, findUserId(c));
-                    ps.setDouble(3, totalV);
-                    ps.setString(4, fullyPaid ? "COMPLETED" : "PENDING");
+                    if (customerId == 0) ps.setNull(1, Types.INTEGER); else ps.setInt(1, customerId);
+                    ps.setInt(2, Session.getInstance().getUserId());
+                    ps.setDouble(3, total);
+                    ps.setString(4, "Completed");
                     ps.executeUpdate();
                     try (ResultSet k = ps.getGeneratedKeys()) { k.next(); saleId = k.getInt(1); }
                 }
-                for (Line l : cart) {
-                    exec(c, "INSERT INTO sale_items (sale_id, product_id, quantity, unit_price, subtotal) VALUES (?,?,?,?,?)",
-                            saleId, l.productId(), l.qty(), l.price(), l.subtotal());
-                    int updated = exec(c, "UPDATE stock SET quantity = quantity - ?, last_updated = NOW() WHERE product_id = ? AND quantity >= ?",
-                            l.qty(), l.productId(), l.qty());
-                    if (updated == 0) throw new SQLException("Not enough stock for " + l.name());
+
+                try (PreparedStatement psItem = c.prepareStatement(
+                        "INSERT INTO sale_items (sale_id, product_id, qty, unit_price) VALUES (?,?,?,?)");
+                     PreparedStatement psStock = c.prepareStatement(
+                             "INSERT INTO stock (product_id, quantity, type, description, last_updated) VALUES (?,?, 'SALE', ?, NOW())")) {
+                    for (Line l : cart) {
+                        psItem.setInt(1, saleId);
+                        psItem.setInt(2, l.productId());
+                        psItem.setInt(3, l.qty());
+                        psItem.setDouble(4, l.price());
+                        psItem.addBatch();
+
+                        psStock.setInt(1, l.productId());
+                        psStock.setInt(2, -l.qty());
+                        psStock.setString(3, "Sale #" + saleId);
+                        psStock.addBatch();
+                    }
+                    psItem.executeBatch();
+                    psStock.executeBatch();
                 }
-                if (paidV > 0) {
-                    exec(c, "INSERT INTO payments (sale_id, payment_status, payment_method, payment_date, amount_paid) VALUES (?,?,?,NOW(),?)",
-                            saleId, fullyPaid ? "PAID" : "PARTIAL", method.getValue(), paidV);
+
+                try (PreparedStatement psPay = c.prepareStatement(
+                        "INSERT INTO payments (sale_id, payment_date, amount_paid, payment_method) VALUES (?,NOW(),?,?)")) {
+                    psPay.setInt(1, saleId);
+                    psPay.setDouble(2, paidAmount);
+                    psPay.setString(3, method);
+                    psPay.executeUpdate();
                 }
+
                 c.commit();
-            } catch (SQLException ex) { c.rollback(); throw ex; }
-        } catch (SQLException ex) { dbError(ex); return; }
-        refresh();
+                refresh();
+            } catch (SQLException ex) {
+                c.rollback();
+                throw ex;
+            }
+        } catch (SQLException ex) {
+            dbError(ex);
+        }
     }
 
-    //  VIEW ITEMS
     private void showDetails(SaleRow r) {
-        List<Detail> items = new ArrayList<>();
-        String sql = "SELECT p.product_name, si.quantity, si.unit_price, si.subtotal FROM sale_items si "
-                + "JOIN products p ON p.product_id = si.product_id WHERE si.sale_id = ?";
+        List<Detail> list = new ArrayList<>();
+        String sql = "SELECT p.product_name, si.qty, si.unit_price, (si.qty * si.unit_price) AS sub "
+                + "FROM sale_items si JOIN products p ON p.product_id = si.product_id WHERE si.sale_id = ?";
         try (Connection c = conn(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, r.id());
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) items.add(new Detail(rs.getString(1), rs.getInt(2), rs.getDouble(3), rs.getDouble(4)));
+                while (rs.next()) {
+                    list.add(new Detail(rs.getString("product_name"), rs.getInt("qty"), rs.getDouble("unit_price"), rs.getDouble("sub")));
+                }
             }
-        } catch (SQLException ex) { dbError(ex); return; }
+        } catch (SQLException e) { dbError(e); return; }
 
-        Label info = new Label(r.customer() + "   •   " + r.cashier() + "   •   " + r.date());
-        info.getStyleClass().add("dlg-label");
-        Label sums = new Label("Total: LKR " + money(r.total()) + "     Paid: LKR " + money(r.paid())
-                + "     Balance: LKR " + money(Math.max(0, r.total() - r.paid())));
-        sums.getStyleClass().add("dlg-text");
+        TableView<Detail> tv = new TableView<>(FXCollections.observableArrayList(list));
+        tv.setPrefHeight(200);
+        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        TableView<Detail> t = new TableView<>(FXCollections.observableArrayList(items));
-        t.getStyleClass().add("pg-table");
-        t.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        t.setFixedCellSize(36);
-        t.setPrefHeight(Math.min(260, 44 + 36 * Math.max(items.size(), 1)));
-        TableColumn<Detail, String> colProduct = mkCol("Product", 220, Detail::product);
-        TableColumn<Detail, String> colQty = mkCol("Qty", 60, x -> String.valueOf(x.qty()));
-        TableColumn<Detail, String> colPrice = mkCol("Unit Price", 100, x -> money(x.price()));
-        TableColumn<Detail, String> colSub = mkCol("Subtotal", 100, x -> money(x.subtotal()));
-        t.getColumns().add(colProduct);
-        t.getColumns().add(colQty);
-        t.getColumns().add(colPrice);
-        t.getColumns().add(colSub);
+        TableColumn<Detail, String> cName = new TableColumn<>("Product");
+        cName.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().product()));
+        TableColumn<Detail, String> cQty = new TableColumn<>("Qty");
+        cQty.setPrefWidth(60);
+        cQty.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().qty())));
+        TableColumn<Detail, String> cPrice = new TableColumn<>("Price");
+        cPrice.setPrefWidth(90);
+        cPrice.setCellValueFactory(d -> new SimpleStringProperty(money(d.getValue().price())));
+        TableColumn<Detail, String> cSub = new TableColumn<>("Subtotal");
+        cSub.setPrefWidth(90);
+        cSub.setCellValueFactory(d -> new SimpleStringProperty(money(d.getValue().subtotal())));
+        tv.getColumns().addAll(cName, cQty, cPrice, cSub);
 
-        VBox box = new VBox(10, info, t, sums);
-        box.setPrefWidth(560);
-        showForm("Sale " + code("SL", r.id()), box, () -> null, "Close", false);
+        VBox box = new VBox(10, new Label("Sale #" + r.id() + " — " + r.customer()), tv);
+        box.setPrefWidth(460);
+        showForm("Sale Details", box, () -> null, "Close", false);
     }
 
-    // DELETE
     private void delete(SaleRow r) {
-        if (!confirm("Delete Sale", "Delete sale " + code("SL", r.id()) + "?\nThe sold items go back into stock.")) return;
+        if (!confirm("Delete Sale", "Delete Sale #" + r.id() + "? Stock will be restored.")) return;
         try (Connection c = conn()) {
             c.setAutoCommit(false);
             try {
-                exec(c, "UPDATE stock s JOIN sale_items si ON si.product_id = s.product_id "
-                        + "SET s.quantity = s.quantity + si.quantity, s.last_updated = NOW() WHERE si.sale_id = ?", r.id());
+                // Restore stock items
+                String fetchItems = "SELECT product_id, qty FROM sale_items WHERE sale_id = ?";
+                try (PreparedStatement ps = c.prepareStatement(fetchItems)) {
+                    ps.setInt(1, r.id());
+                    try (ResultSet rs = ps.executeQuery();
+                         PreparedStatement psStock = c.prepareStatement("INSERT INTO stock (product_id, quantity, type, description, last_updated) VALUES (?,?, 'RESTORE', ?, NOW())")) {
+                        while (rs.next()) {
+                            psStock.setInt(1, rs.getInt("product_id"));
+                            psStock.setInt(2, rs.getInt("qty"));
+                            psStock.setString(3, "Void Sale #" + r.id());
+                            psStock.addBatch();
+                        }
+                        psStock.executeBatch();
+                    }
+                }
+
                 exec(c, "DELETE FROM payments WHERE sale_id = ?", r.id());
                 exec(c, "DELETE FROM sale_items WHERE sale_id = ?", r.id());
                 exec(c, "DELETE FROM sales WHERE sale_id = ?", r.id());
                 c.commit();
-            } catch (SQLException ex) { c.rollback(); throw ex; }
-        } catch (SQLException ex) { dbError(ex); return; }
-        refresh();
+                refresh();
+            } catch (SQLException ex) {
+                c.rollback();
+                throw ex;
+            }
+        } catch (SQLException ex) {
+            dbError(ex);
+        }
     }
 
-    // export
-    @Override protected String exportName() { return "sales"; }
-    @Override protected String[] csvHeader() { return new String[]{"ID", "Customer", "Cashier", "Date", "Total", "Paid", "Status"}; }
-    @Override protected String[] csvRow(SaleRow r) {
-        return new String[]{code("SL", r.id()), r.customer(), r.cashier(), r.date(), plain(r.total()), plain(r.paid()), titleCase(r.status())};
-    }
-
-    // private helpers (self-contained)
-    private static Button iconButton(String text, String styleClass) {
+    private Button iconButton(String text, String cls) {
         Button b = new Button(text);
-        b.getStyleClass().addAll("pg-icon-btn", styleClass);
+        b.getStyleClass().addAll("pg-icon-btn", cls);
         return b;
     }
 
-    private static <S> TableColumn<S, String> mkCol(String title, double width, Function<S, String> value) {
-        TableColumn<S, String> c = new TableColumn<>(title);
-        c.setPrefWidth(width);
-        c.setSortable(false);
-        c.setCellValueFactory(cd -> new SimpleStringProperty(value.apply(cd.getValue())));
-        return c;
-    }
-
-    private static String titleCase(String s) {
-        if (s == null || s.isBlank()) return "-";
+    private String titleCase(String s) {
+        if (s == null || s.isEmpty()) return "";
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 
-    private static String whenText(Timestamp ts) {
-        if (ts == null) return "-";
-        LocalDateTime t = ts.toLocalDateTime();
-        return (t.getHour() == 0 && t.getMinute() == 0) ? t.toLocalDate().toString()
-                : t.toString().replace('T', ' ').substring(0, 16);
+    private String whenText(Timestamp ts) {
+        return ts == null ? "" : ts.toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
     }
 
-    private static double cartTotal(ObservableList<Line> cart) {
-        double sum = 0;
-        for (Line l : cart) sum += l.subtotal();
-        return sum;
-    }
-
-    private String addToCart(ObservableList<Line> cart, Prod p, String qtyText, double price, boolean checkStock) {
-        if (p == null) return "Select a product first.";
-        Integer q = whole(qtyText);
-        if (q == null || q == 0) return "Quantity must be a whole number greater than 0.";
-        int existing = 0;
-        int index = -1;
-        for (int i = 0; i < cart.size(); i++) {
-            if (cart.get(i).productId() == p.id()) { existing = cart.get(i).qty(); index = i; }
-        }
-        if (checkStock && existing + q > p.stock()) return "Only " + p.stock() + " in stock for " + p.name() + ".";
-        Line line = new Line(p.id(), p.name(), existing + q, price);
-        if (index >= 0) cart.set(index, line); else cart.add(line);
-        return null;
-    }
-
-    private TableView<Line> buildCartTable(ObservableList<Line> cart, String priceTitle) {
-        TableView<Line> t = new TableView<>(cart);
-        t.getStyleClass().add("pg-table");
-        t.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        t.setFixedCellSize(36);
-        t.setPrefHeight(190);
-        t.setMinHeight(190);
-        t.setPlaceholder(new Label("No items added yet"));
-
-        TableColumn<Line, String> cName = mkCol("Product", 220, Line::name);
-        TableColumn<Line, String> cQty = mkCol("Qty", 60, l -> String.valueOf(l.qty()));
-        TableColumn<Line, String> cPrice = mkCol(priceTitle, 90, l -> money(l.price()));
-        TableColumn<Line, String> cSub = mkCol("Subtotal", 100, l -> money(l.subtotal()));
-
-        TableColumn<Line, Void> cDel = new TableColumn<>("");
-        cDel.setPrefWidth(40);
-        cDel.setSortable(false);
-        cDel.setCellFactory(tc -> new TableCell<>() {
-            private final Button b = iconButton("✕", "pg-icon-delete");
-            {
-                b.setOnAction(e -> {
-                    Line line = getTableRow() == null ? null : getTableRow().getItem();
-                    if (line != null) cart.remove(line);
-                });
-            }
-            @Override protected void updateItem(Void v, boolean empty) {
-                super.updateItem(v, empty);
-                setGraphic(empty ? null : b);
-            }
-        });
-
-        t.getColumns().add(cName);
-        t.getColumns().add(cQty);
-        t.getColumns().add(cPrice);
-        t.getColumns().add(cSub);
-        t.getColumns().add(cDel);
-        return t;
-    }
-
-    private List<Prod> loadProds() {
-        String sql = "SELECT p.product_id, p.product_name, COALESCE(p.selling_price,0) AS price, COALESCE(s.qty,0) AS qty "
-                + "FROM products p LEFT JOIN (SELECT product_id, SUM(quantity) AS qty FROM stock GROUP BY product_id) s "
-                + "ON s.product_id = p.product_id ORDER BY p.product_name";
-        List<Prod> list = new ArrayList<>();
-        try (Connection c = conn(); Statement st = c.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) list.add(new Prod(rs.getInt(1), rs.getString(2), rs.getDouble(3), rs.getInt(4)));
-        } catch (SQLException ex) { dbError(ex); }
-        return list;
-    }
-
-    private int findUserId(Connection c) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement("SELECT user_id FROM users WHERE full_name = ? LIMIT 1")) {
-            ps.setString(1, Session.getName());
-            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getInt(1); }
-        }
-        try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery("SELECT MIN(user_id) FROM users")) {
-            return rs.next() ? rs.getInt(1) : 0;
-        }
+    @Override protected String exportName() { return "sales"; }
+    @Override protected String[] csvHeader() { return new String[]{"ID", "Customer", "Cashier", "Date", "Total", "Paid", "Status"}; }
+    @Override protected String[] csvRow(SaleRow r) {
+        return new String[]{code("SL", r.id()), r.customer(), r.cashier(), r.date(), plain(r.total()), plain(r.paid()), r.status()};
     }
 }

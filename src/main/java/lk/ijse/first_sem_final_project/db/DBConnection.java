@@ -6,22 +6,27 @@ import java.sql.SQLException;
 
 public class DBConnection {
     private static DBConnection dbConnection;
-    private final Connection connection;
+    private Connection connection;
 
-    // Removed the trailing '?' from the URL
-    private String url = "jdbc:mysql://localhost:3306/nexus_wine_store";
-    private String user = "root";
-    private String password = "ijse@1234";
+    private String URL = "jdbc:mysql://localhost:3306/nexus_wine_store";
+    private String USER = "root";
+    private String PASSWORD = "ijse@1234";
 
     private DBConnection() throws SQLException {
-        connection = DriverManager.getConnection(url, user, password);
+        this.connection = DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    public static DBConnection getInstance() throws SQLException {
-        return dbConnection == null ? dbConnection = new DBConnection() : dbConnection;
+    public static synchronized DBConnection getInstance() throws SQLException {
+        if (dbConnection == null || dbConnection.getConnection() == null || dbConnection.getConnection().isClosed()) {
+            dbConnection = new DBConnection();
+        }
+        return dbConnection;
     }
 
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        }
         return connection;
     }
 }

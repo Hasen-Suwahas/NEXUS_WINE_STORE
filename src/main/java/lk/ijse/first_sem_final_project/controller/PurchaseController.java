@@ -355,7 +355,7 @@ public class PurchaseController extends BasePageController<PurchaseController.Pu
 
     private int findUserId(Connection c) throws SQLException {
         try (PreparedStatement ps = c.prepareStatement("SELECT user_id FROM users WHERE full_name = ? LIMIT 1")) {
-            ps.setString(1, Session.getName());
+            ps.setString(1, Session.getInstance().getName());
             try (ResultSet rs = ps.executeQuery()) { if (rs.next()) return rs.getInt(1); }
         }
         try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery("SELECT MIN(user_id) FROM users")) {

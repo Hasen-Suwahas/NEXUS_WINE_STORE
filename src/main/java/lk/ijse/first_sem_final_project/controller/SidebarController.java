@@ -20,9 +20,9 @@ public class SidebarController {
     public void initialize() { refreshUser(); }
 
     public void refreshUser() {
-        String name = Session.getName();
+        String name = Session.getInstance().getName();
         lblUserName.setText(name);
-        lblUserRole.setText(Session.getRole().isBlank() ? "Online" : Session.getRole());
+        lblUserRole.setText(Session.getInstance().getRole().isBlank() ? "Online" : Session.getInstance().getRole());
         lblAvatar.setText(name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase());
     }
 
