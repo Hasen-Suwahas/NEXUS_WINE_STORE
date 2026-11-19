@@ -13,7 +13,7 @@ public class AppInitializer extends Application {
     }
     @Override
     public void start(Stage stage) throws Exception {
-        Parent load = FXMLLoader.load(getClass().getResource("/view/DashBoardPage.fxml"));
+        Parent load = FXMLLoader.load(getClass().getResource("/view/Login.fxml"));
 
         stage.setTitle("Nexus_Wine_Store");
         stage.setScene(new Scene(load));

@@ -18,7 +18,7 @@
 <?import javafx.scene.shape.Polygon?>
 <?import javafx.scene.shape.Polyline?>
 
-<StackPane fx:id="root" onMouseDragged="#onWindowDrag" onMousePressed="#onWindowPress" prefHeight="640" prefWidth="1000" styleClass="login-root" stylesheets="@../style/Login.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.SignUpController">
+<StackPane fx:id="root" onMouseDragged="#onWindowDrag" onMousePressed="#onWindowPress" prefHeight="640" prefWidth="1000" styleClass="login-root" stylesheets="@../style/Login.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.ijse.first_sem_final_project.controller.SignUpController">
 
     <HBox>
         <!-- ================= LEFT: photo with diagonal gold cut ================= -->
@@ -93,14 +93,14 @@
             <HBox fx:id="userBox" alignment="CENTER_LEFT" maxWidth="430" spacing="14" style="-fx-min-height: 44; -fx-pref-height: 44; -fx-max-height: 44;" styleClass="input-box">
                 <VBox.margin><Insets top="10" /></VBox.margin>
                 <Label styleClass="input-icon" text="🆔" />
-                <TextField fx:id="txtUsername" onAction="#onSignUp" promptText="Choose a Username" styleClass="input-field" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="txtUsername" onAction="#onSignUp" promptText="Choose a Username (4-20 characters)" styleClass="input-field" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- phone -->
             <HBox fx:id="phoneBox" alignment="CENTER_LEFT" maxWidth="430" spacing="14" style="-fx-min-height: 44; -fx-pref-height: 44; -fx-max-height: 44;" styleClass="input-box">
                 <VBox.margin><Insets top="10" /></VBox.margin>
                 <Label styleClass="input-icon" text="📞" />
-                <TextField fx:id="txtPhone" onAction="#onSignUp" promptText="Phone Number" styleClass="input-field" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="txtPhone" onAction="#onSignUp" promptText="Phone Number (07XXXXXXXX)" styleClass="input-field" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- password -->
@@ -108,8 +108,8 @@
                 <VBox.margin><Insets top="10" /></VBox.margin>
                 <Label styleClass="input-icon" text="🔒" />
                 <StackPane alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                    <PasswordField fx:id="txtPassword" onAction="#onSignUp" promptText="Enter Password" styleClass="input-field" />
-                    <TextField fx:id="txtPasswordVisible" managed="false" onAction="#onSignUp" promptText="Enter Password" styleClass="input-field" visible="false" />
+                    <PasswordField fx:id="txtPassword" onAction="#onSignUp" promptText="Enter Password (min 6 characters)" styleClass="input-field" />
+                    <TextField fx:id="txtPasswordVisible" managed="false" onAction="#onSignUp" promptText="Enter Password (min 6 characters)" styleClass="input-field" visible="false" />
                 </StackPane>
                 <Button fx:id="btnEye" focusTraversable="false" onAction="#togglePassword" styleClass="eye-btn" text="👁" />
             </HBox>
@@ -124,6 +124,7 @@
                 </StackPane>
             </HBox>
 
+            <!-- error / success message -->
             <Label fx:id="lblMessage" managed="false" maxWidth="430" styleClass="error-label" visible="false" wrapText="true">
                 <VBox.margin><Insets top="8" /></VBox.margin>
             </Label>

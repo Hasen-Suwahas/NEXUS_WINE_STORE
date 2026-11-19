@@ -33,7 +33,7 @@ public class SignUpController {
     private static final String DEFAULT_ROLE = "Cashier";   // role given to every new account
     private static final String FIRST_USER_ROLE = "Admin";  // the very first account becomes Admin
 
-    private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_.]{4,20}$");
+    private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_.]{4,8}$");
     private static final Pattern PHONE = Pattern.compile("^\\+?\\d{9,10}$");
 
     @FXML private StackPane root;
