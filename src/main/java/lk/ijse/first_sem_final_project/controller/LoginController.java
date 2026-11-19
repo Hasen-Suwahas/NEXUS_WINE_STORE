@@ -36,6 +36,7 @@ public class LoginController {
     private static final String DB_PASS = "";
     private static final String DASHBOARD_FXML = "/view/DashBoardPage.fxml";
     private static final String SIGNUP_FXML    = "/view/SignUpPage.fxml"; // <- Sign Up FXML path එක (අවශ්‍ය නම් වෙනස් කරගන්න)
+    private static final String FORGOT_FXML    = "/view/ForgotPasswordPage.fxml";
     private static final String SIDE_IMAGE = "/image/login_side.jpg";   // optional bottle/wine photo
 
     @FXML private StackPane root;
@@ -152,7 +153,7 @@ public class LoginController {
     // OPEN DASHBOARD
     private void openDashboard(LoginResult user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(DASHBOARD_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/DashBoardPage.fxml"));
             Parent dash = loader.load();
 
             Stage stage = new Stage();
@@ -180,16 +181,8 @@ public class LoginController {
     @FXML
     private void onSignUp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUp.fxml"));
-            Parent signup = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Nexus Wine Store - Sign Up");
-            stage.setScene(new Scene(signup, 1000, 640));
-            stage.show();
-            stage.centerOnScreen();
-
-            ((Stage) root.getScene().getWindow()).close();
+            Parent signup = FXMLLoader.load(getClass().getResource("/view/SignUp.fxml"));
+            root.getScene().setRoot(signup);     // same window, so the sign up page keeps the login look
         } catch (Exception ex) {
             ex.printStackTrace();
             showError("Could not open the Sign Up window: " + ex.getMessage());
@@ -199,11 +192,21 @@ public class LoginController {
     // ===================== FORGOT PASSWORD LINK =====================
     @FXML
     private void onForgotPassword() {
-        Alert a = new Alert(Alert.AlertType.INFORMATION,
-                "Please contact your system administrator to reset your password.");
-        a.setHeaderText("Forgot Password");
-        a.show();
-        // TODO: later you can replace this with a real "Reset Password" window
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ForgotPassword.fxml"));
+            Parent forgot = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Nexus Wine Store - Reset Password");
+            stage.setScene(new Scene(forgot, 520, 560));
+            stage.show();
+            stage.centerOnScreen();
+
+            ((Stage) root.getScene().getWindow()).close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Could not open the Reset Password window: " + ex.getMessage());
+        }
     }
 
     // UI HELPERS
